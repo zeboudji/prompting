@@ -10,6 +10,10 @@ st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
 if "question_number" not in st.session_state:
     st.session_state["question_number"] = 1
 
+def next_question():
+    """ Function to move to the next question """
+    st.session_state["question_number"] += 1
+
 # Define questions with emojis, colors, and a default "Select" option
 questions = [
     ("🌱 **Quel est votre niveau de familiarité avec l’écriture de prompts pour l’IA ?**",
@@ -31,25 +35,21 @@ responses_scores = {
 }
 
 # Display current question with enhanced visibility and background color
-question_text, choices = questions[st.session_state["question_number"] - 1]
-st.markdown(f"<div style='padding: 20px; background-color: #e3f2fd; border-radius: 10px; color: #0d47a1;'><b>{question_text}</b></div>", unsafe_allow_html=True)
-response = st.selectbox("Sélectionnez une réponse :", choices, key=f"question_{st.session_state['question_number']}")
-
-# Progress automatically when a valid response is selected, with a shorter delay for fluidity
-if response != "Sélectionnez une réponse":
-    st.session_state[f"response_{st.session_state['question_number']}"] = response
-    st.markdown("<div style='color: #4caf50; font-size: 1.2em;'>⏳ Transition en cours...</div>", unsafe_allow_html=True)
-    time.sleep(0.5)  # Shorter delay for smoother transition
-    st.session_state["question_number"] += 1
-
-# Display results and radar chart after all questions
-if st.session_state["question_number"] > len(questions):
+if st.session_state["question_number"] <= len(questions):
+    question_text, choices = questions[st.session_state["question_number"] - 1]
+    st.markdown(f"<div style='padding: 20px; background-color: #e3f2fd; border-radius: 10px; color: #0d47a1;'><b>{question_text}</b></div>", unsafe_allow_html=True)
+    response = st.selectbox("Sélectionnez une réponse :", choices, key=f"question_{st.session_state['question_number']}")
+    
+    # Display the button to proceed to the next question only when a valid response is selected
+    if response != "Sélectionnez une réponse":
+        st.button("Suivant", on_click=next_question)
+else:
     # Calculate scores for radar chart
     competence_scores = {
-        "Familiarité": responses_scores[st.session_state.get("response_1", "🔰 Débutant(e)")],
-        "Expérience Agile": responses_scores[st.session_state.get("response_2", "❓ Pas familier(e) avec ces termes")],
-        "Clarté": responses_scores[st.session_state.get("response_3", "⚠️ Besoin d’amélioration")],
-        "Diviser une Tâche": responses_scores[st.session_state.get("response_4", "❌ Non, je ne suis pas sûr(e) de comment faire")]
+        "Familiarité": responses_scores[st.session_state.get("question_1", "🔰 Débutant(e)")],
+        "Expérience Agile": responses_scores[st.session_state.get("question_2", "❓ Pas familier(e) avec ces termes")],
+        "Clarté": responses_scores[st.session_state.get("question_3", "⚠️ Besoin d’amélioration")],
+        "Diviser une Tâche": responses_scores[st.session_state.get("question_4", "❌ Non, je ne suis pas sûr(e) de comment faire")]
     }
     
     # DataFrame for Radar Chart
