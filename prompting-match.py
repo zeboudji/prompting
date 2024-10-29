@@ -226,6 +226,7 @@ def reset_evaluation():
     st.session_state["responses"] = {}
     st.session_state["question_number"] = 0
     st.session_state["show_results"] = False
+    st.experimental_rerun()
 
 # Fonction pour afficher les résultats
 def display_results():
@@ -288,45 +289,50 @@ def display_results():
     )
 
     # Création du contenu HTML complet pour la page des résultats
-    html_content = f"""
-    <div class='result-container'>
-        <div class='icon'>🌟</div>
-        <div class='result-title'>**Félicitations !**</div>
-        <h3>🔢 Votre Niveau d'Acculturation à l'IA: **{pourcentage:.1f}%**</h3>
-        <h3>**{niveau}**</h3>
-        <br>
-        <div>
-            <!-- Le graphique radar sera inséré ici -->
-        </div>
-        <br>
-        <p class='motivation-message'><b>{niveau_message}</b></p>
-        <hr>
-        <h3>🎓 Continuez votre parcours !</h3>
-        <p>{recommandation}</p>
-        <p>👉 <a href="https://insidegroup.fr/actualites/acculturation-ia/" style="color: #81c784;">Découvrez nos formations</a></p>
-        <hr>
-        <div class='button-container'>
-            <button onclick="window.location.href='?reset=true'">🔄 Recommencer l'évaluation</button>
-        </div>
-    </div>
-    """
-
-    # Afficher le contenu HTML de la page des résultats
-    st.markdown(html_content, unsafe_allow_html=True)
-
+    st.markdown("<div class='container result-container'>", unsafe_allow_html=True)
+    
+    # Icône de félicitations
+    st.markdown("<div class='icon'>🌟</div>", unsafe_allow_html=True)
+    
+    # Titre de félicitations
+    st.markdown("**Félicitations !**", unsafe_allow_html=True)
+    
+    # Niveau d'acculturation
+    st.markdown(f"### 🔢 Votre Niveau d'Acculturation à l'IA: **{pourcentage:.1f}%**", unsafe_allow_html=True)
+    st.markdown(f"### **{niveau}**", unsafe_allow_html=True)
+    
+    # Ajout d'un espace
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     # Afficher le graphique radar
     st.plotly_chart(fig, use_container_width=True)
-
-    # Gestion de la réinitialisation via URL
-    query_params = st.experimental_get_query_params()
-    if "reset" in query_params:
+    
+    # Ajout d'un espace
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Message de niveau
+    st.markdown(f"<div class='motivation-message'><b>{niveau_message}</b></div>", unsafe_allow_html=True)
+    
+    # Recommandation supplémentaire
+    st.markdown(f"<div class='motivation-message'>{recommandation}</div>", unsafe_allow_html=True)
+    
+    # Proposition de formation avec lien
+    st.markdown("""
+        ---
+        🎓 **Continuez votre parcours !**
+        
+        Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Cela démontre une forte compatibilité avec nos formations avancées qui vous permettront de devenir un véritable **pro de l'IA**.
+        
+        👉 [Découvrez nos formations](https://insidegroup.fr/actualites/acculturation-ia/)
+    """.format(pourcentage=pourcentage), unsafe_allow_html=True)
+    
+    # Bouton pour recommencer l'évaluation
+    st.markdown("<div class='button-container'>", unsafe_allow_html=True)
+    if st.button("🔄 Recommencer l'évaluation"):
         reset_evaluation()
-
-# Gestion de la réinitialisation via bouton
-if st.button("🔄 Recommencer l'évaluation"):
-    reset_evaluation()
-    # Pour éviter que le bouton reste enfoncé et que la page ne se recharge pas automatiquement
-    st.experimental_rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # Affichage des questions ou des résultats selon l'état
 if not st.session_state["show_results"]:
