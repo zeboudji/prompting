@@ -118,3 +118,4 @@ if st.session_state["step"] == "results":
     # Bouton pour recommencer l'évaluation
     if st.button("🔄 Recommencer l'évaluation"):
         reset_evaluation()
+
