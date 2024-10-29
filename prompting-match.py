@@ -73,32 +73,32 @@ questions = [
     {
         "theme": "Compréhension des Concepts",
         "question": "🗣️ **Dans votre métier, vous arrive-t-il d'exprimer des besoins spécifiques à votre équipe ou à votre supérieur ?**",
-        "choices": ["Sélectionnez une réponse", "🔰 Rarement", "📚 Parfois", "🌟 Fréquemment"]
+        "choices": ["🔰 Rarement", "📚 Parfois", "🌟 Fréquemment"]
     },
     {
         "theme": "Identification des Besoins",
         "question": "📋 **Est-ce que vous avez l'habitude de récolter les besoins de vos clients ou de vos collègues pour définir des projets ?**",
-        "choices": ["Sélectionnez une réponse", "🔰 Jamais", "📚 Occasionnellement", "🌟 Régulièrement"]
+        "choices": ["🔰 Jamais", "📚 Occasionnellement", "🌟 Régulièrement"]
     },
     {
         "theme": "Connaissance de l'Agilité",
         "question": "⚡ **Le concept d'agilité en gestion de projet vous est-il familier ?**",
-        "choices": ["Sélectionnez une réponse", "🔰 Pas du tout", "📚 Un peu", "🌟 Oui, je l'applique régulièrement"]
+        "choices": ["🔰 Pas du tout", "📚 Un peu", "🌟 Oui, je l'applique régulièrement"]
     },
     {
         "theme": "Utilisation des Outils IA",
         "question": "🤖 **Utilisez-vous des outils d'intelligence artificielle (IA) pour améliorer votre efficacité au travail ?**",
-        "choices": ["Sélectionnez une réponse", "🔰 Jamais", "📚 Parfois", "🌟 Fréquemment"]
+        "choices": ["🔰 Jamais", "📚 Parfois", "🌟 Fréquemment"]
     },
     {
         "theme": "Rédaction de Prompts",
         "question": "📝 **Avez-vous déjà rédigé des prompts pour interagir avec des outils d'IA comme ChatGPT ?**",
-        "choices": ["Sélectionnez une réponse", "🔰 Jamais", "📚 Rarement", "🌟 Souvent"]
+        "choices": ["🔰 Jamais", "📚 Rarement", "🌟 Souvent"]
     },
     {
         "theme": "Structuration des Informations",
         "question": "📊 **Comment évaluez-vous votre capacité à organiser les informations fournies par un outil d'IA dans vos rapports ou présentations ?**",
-        "choices": ["Sélectionnez une réponse", "🔰 Peu structuré", "📚 Moyennement structuré", "🌟 Très structuré"]
+        "choices": ["🔰 Peu structuré", "📚 Moyennement structuré", "🌟 Très structuré"]
     }
 ]
 
@@ -117,7 +117,9 @@ def display_question_accordion():
             with st.expander(f"{question_data['theme']}", expanded=True):  # Créer un accordéon pour la question courante
                 question_text = question_data["question"]
                 choices = question_data["choices"]
-                selected = st.radio(question_text, choices, key=f"response_{idx}", on_change=lambda: save_response(st.session_state[f"response_{idx}"], idx))
+                selected = st.radio(question_text, choices, key=f"response_{idx}")
+                if selected:
+                    save_response(selected, idx)
         else:
             with st.expander(f"{question_data['theme']}", expanded=False):
                 st.markdown(f"**{question_data['question']}**")
@@ -134,9 +136,9 @@ def display_results():
     # Calcul des scores pour le graphique radar
     competence_scores = {}
     for idx, q in enumerate(questions, 1):
-        response = st.session_state["responses"].get(f"Question {idx}", "Sélectionnez une réponse")
+        response = st.session_state["responses"].get(f"Question {idx}", "")
         try:
-            score = q["choices"].index(response)
+            score = q["choices"].index(response) + 1
         except ValueError:
             score = 0
         competence_scores[q["theme"]] = score
