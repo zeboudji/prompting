@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 
 # Configuration de la page
 st.set_page_config(
-    page_title="L'iA, c'est pour moi ?",
+    page_title="L'IA, c'est pour moi ?",
     page_icon="🚀",
     layout="centered",
     initial_sidebar_state="collapsed",
