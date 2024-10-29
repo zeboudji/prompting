@@ -102,10 +102,13 @@ questions = [
     }
 ]
 
-def save_response(response, question_num):
+def save_response():
     """Sauvegarder la réponse et passer à la question suivante"""
+    current_question = st.session_state["question_number"]
+    response_key = f"response_{current_question}"
+    response = st.session_state.get(response_key, None)
     if response:  # Vérifier si une réponse est sélectionnée
-        st.session_state["responses"][f"Question {question_num}"] = response
+        st.session_state["responses"][f"Question {current_question}"] = response
         st.session_state["question_number"] += 1
         # Vérification directe pour afficher les résultats si dernière question
         if st.session_state["question_number"] >= len(questions):
@@ -118,7 +121,7 @@ def display_question_accordion():
             with st.expander(f"{question_data['theme']}", expanded=True):  # Créer un accordéon pour la question courante
                 question_text = question_data["question"]
                 choices = question_data["choices"]
-                selected = st.radio(question_text, choices, key=f"response_{idx}", on_change=save_response, args=(st.session_state[f"response_{idx}"], idx))
+                st.radio(question_text, choices, key=f"response_{idx}", on_change=save_response)
         else:
             with st.expander(f"{question_data['theme']}", expanded=False):
                 st.markdown(f"**{question_data['question']}**")
