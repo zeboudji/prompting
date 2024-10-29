@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 
 # Configuration de la page
 st.set_page_config(
-    page_title="Niveau d'acculturation à l'IA",
+    page_title="🚀 Niveau d'acculturation à l'IA",
     page_icon="🚀",
     layout="centered",
     initial_sidebar_state="auto",
@@ -13,26 +13,28 @@ st.set_page_config(
 st.markdown("""
     <style>
     /* Style général de la page */
-    .main {
-        background-color: #121212;
+    body {
+        background-color: #1a1a1a;
         color: #ffffff;
     }
     /* Style pour les conteneurs de questions */
     .question-container {
         padding: 20px;
-        background-color: #1e1e1e;
+        background-color: #2c2c2c;
         border-radius: 10px;
         margin-bottom: 20px;
         color: #ffffff;
     }
     /* Style pour le conteneur des résultats */
     .result-container {
-        padding: 30px;
-        background-color: #1a237e;
+        padding: 40px;
+        background-color: #2c2c2c;
         border-radius: 15px;
         text-align: center;
         color: #ffffff;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        max-width: 800px;
+        margin: auto;
     }
     /* Style pour les boutons */
     .button-container {
@@ -42,6 +44,7 @@ st.markdown("""
     /* Style pour les textes d'erreur */
     .error-message {
         color: #ff1744;
+        font-size: 0.9em;
     }
     /* Style pour le bouton "Découvrez nos formations" en haut à droite */
     .top-right-button {
@@ -57,7 +60,7 @@ st.markdown("""
         justify-content: space-between;
         padding: 0;
         margin-bottom: 20px;
-        font-size: 0.8em; /* Réduction de la taille du texte */
+        font-size: 0.9em;
     }
     .breadcrumb li {
         flex: 1;
@@ -81,50 +84,36 @@ st.markdown("""
         font-weight: bold;
         color: #4CAF50;
     }
-    /* Style pour les cartes */
-    .card {
-        background-color: #1e1e1e;
-        border-radius: 10px;
-        padding: 20px;
-        text-align: center;
-        color: #ffffff;
-        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-        transition: 0.3s;
-        cursor: pointer;
-    }
-    .card:hover {
-        background-color: #2e7d32;
-    }
-    /* Style pour le titre des cartes */
-    .card-title {
-        font-size: 1.5em;
-        margin-bottom: 10px;
-    }
-    /* Style pour les descriptions des cartes */
-    .card-description {
-        font-size: 1em;
-        color: #cccccc;
-    }
-    /* Style pour le graphique radar */
-    .radar-title {
-        text-align: center;
-        color: #ffffff;
-        margin-bottom: -30px;
-    }
-    /* Style pour le niveau */
-    .niveau {
-        font-size: 1.2em;
-        margin-top: 10px;
-    }
-    /* Style pour les recommandations */
-    .recommandation {
-        font-size: 1em;
-        margin-top: 20px;
-    }
     /* Style pour les icônes */
     .icon {
-        font-size: 3em;
+        font-size: 4em;
         margin-bottom: 10px;
+    }
+    /* Style pour les messages motivants */
+    .motivation-message {
+        font-size: 1.2em;
+        margin-top: 20px;
+        color: #81c784;
+    }
+    /* Style pour les titres */
+    .result-title {
+        font-size: 2em;
+        margin-top: 10px;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+        .breadcrumb {
+            flex-direction: column;
+            align-items: center;
+        }
+        .breadcrumb li::after {
+            width: 2px;
+            height: 100%;
+            top: -50%;
+            left: 50%;
+            right: auto;
+            transform: rotate(90deg);
+        }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -154,14 +143,12 @@ st.markdown("""
 st.markdown("# 🚀 Niveau d'acculturation à l'IA")
 
 # Initialisation de l'état de session avec setdefault pour éviter KeyError
-for key in ["responses", "question_number", "show_results"]:
-    if key not in st.session_state:
-        if key == "responses":
-            st.session_state[key] = {}
-        elif key == "question_number":
-            st.session_state[key] = 0
-        elif key == "show_results":
-            st.session_state[key] = False
+if 'responses' not in st.session_state:
+    st.session_state['responses'] = {}
+if 'question_number' not in st.session_state:
+    st.session_state['question_number'] = 0
+if 'show_results' not in st.session_state:
+    st.session_state['show_results'] = False
 
 # Définition des questions avec thèmes, emojis et options adaptées
 questions = [
@@ -197,20 +184,13 @@ questions = [
     }
 ]
 
-# Mapping des réponses à un score numérique pour le graphique radar
-responses_scores = {
-    "🔰 Rarement": 1, "📘 Parfois": 2, "🌟 Fréquemment": 3,
-    "🔰 Jamais": 1, "📘 Occasionnellement": 2, "🌟 Régulièrement": 3,
-    "🔰 Pas du tout": 1, "📘 Un peu": 2, "🌟 Oui, je l'applique régulièrement": 3,
-    "🔰 Jamais": 1, "📘 Parfois": 2, "🌟 Fréquemment": 3,
-    "🔰 Jamais": 1, "📘 Rarement": 2, "🌟 Souvent": 3,
-    "🔰 Peu structuré": 1, "📘 Moyennement structuré": 2, "🌟 Très structuré": 3
-}
-
 def save_response(response, question_num):
     """Sauvegarder la réponse et passer à la question suivante"""
     st.session_state["responses"][f"Question {question_num}"] = response
     st.session_state["question_number"] += 1
+    # Si c'est la dernière question, afficher les résultats
+    if st.session_state["question_number"] >= len(questions):
+        st.session_state["show_results"] = True
 
 # Fonction pour afficher une question avec fil d'Ariane
 def display_question(question_data, question_num):
@@ -230,48 +210,47 @@ def display_question(question_data, question_num):
             breadcrumb += f'<li>{current_theme}</li>'
     breadcrumb += '</ul>'
     st.markdown(breadcrumb, unsafe_allow_html=True)
-    
+
     # Affichage de la question
     st.markdown(f"<div class='question-container'><b>{question_text}</b></div>", unsafe_allow_html=True)
-    
+
     # Gestion des réponses avec callback
-    def on_change():
-        selected = st.session_state[f"response_{question_num}"]
-        if selected != "Sélectionnez une réponse":
-            save_response(selected, question_num)
-    
-    selected = st.radio("Sélectionnez une réponse :", choices, key=f"response_{question_num}", on_change=on_change)
-    
-    if selected == "Sélectionnez une réponse":
+    selected = st.radio("Sélectionnez une réponse :", choices, key=f"response_{question_num}")
+
+    if selected != "Sélectionnez une réponse":
+        save_response(selected, question_num)
+    else:
         st.markdown("<span class='error-message'>Veuillez sélectionner une réponse valide.</span>", unsafe_allow_html=True)
+
+# Fonction pour réinitialiser l'évaluation
+def reset_evaluation():
+    st.session_state["responses"] = {}
+    st.session_state["question_number"] = 0
+    st.session_state["show_results"] = False
 
 # Fonction pour afficher les résultats
 def display_results():
-    st.markdown("<div class='result-container'>", unsafe_allow_html=True)
-    
-    # Icône de félicitations
-    st.markdown("<div class='icon'>🌟</div>", unsafe_allow_html=True)
-    
-    # Titre de félicitations
-    st.markdown("**Félicitations !**", unsafe_allow_html=True)
-    
-    # Niveau d'acculturation
     # Calcul des scores pour le graphique radar
     competence_scores = {}
     for idx, q in enumerate(questions, 1):
         response = st.session_state["responses"].get(f"Question {idx}", "🔰 Rarement")
-        score = responses_scores.get(response, 1)
-        theme = q["theme"]
-        competence_scores[theme] = score
-    
+        # Calculer le score basé sur l'index de la réponse
+        # Les choix sont ["Sélectionnez une réponse", "Option 1", "Option 2", "Option 3"]
+        # Donc l'index 1 correspond à score 1, index 2 à score 2, etc.
+        try:
+            score = q["choices"].index(response)
+        except ValueError:
+            score = 0  # Si la réponse n'est pas trouvée
+        competence_scores[q["theme"]] = score
+
     categories = list(competence_scores.keys())
     values = list(competence_scores.values())
-    
-    # Calcul du pourcentage de connaissances
+
+    # Calcul du pourcentage de compatibilité
     total_score = sum(values)
     max_score = len(values) * 3
-    pourcentage = (total_score / max_score) * 100
-    
+    pourcentage = (total_score / max_score) * 100 if max_score > 0 else 0
+
     # Détermination du niveau basé sur le pourcentage
     if pourcentage < 60:
         niveau = "🎓 Sensibilisation à l'IA"
@@ -281,22 +260,18 @@ def display_results():
         niveau = "🚀 Acculturation pour devenir un AS de l'IA"
         niveau_message = "Félicitations ! Vous êtes éligible à l'**Acculturation** pour devenir un **AS de l'IA**. Toutes les conditions sont réunies !"
         recommandation = "Nous vous invitons à rejoindre notre programme d'acculturation avancée pour maîtriser pleinement les outils et concepts de l'intelligence artificielle."
-    
-    # Afficher le niveau avec une mise en page agréable
-    st.markdown(f"### 🔢 Votre Niveau d'Acculturation à l'IA: **{pourcentage:.1f}%**", unsafe_allow_html=True)
-    st.markdown(f"### **{niveau}**", unsafe_allow_html=True)
-    
-    # Ajout d'un espace
-    st.markdown("<br>", unsafe_allow_html=True)
-    
+
     # Création du graphique radar avec Plotly
-    fig = go.Figure(data=go.Scatterpolar(
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatterpolar(
         r=values,
         theta=categories,
         fill='toself',
+        name='Compétences',
         marker=dict(color='rgba(56, 128, 255, 0.6)')
     ))
-    
+
     fig.update_layout(
         title="🌟 Votre Radar de Compétences en IA 🌟",
         polar=dict(
@@ -311,49 +286,48 @@ def display_results():
         showlegend=False,
         template="plotly_dark"
     )
-    
-    st.plotly_chart(fig, use_container_width=True)
-    
-    # Ajout d'un espace
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Message de niveau
-    st.markdown(f"""
-        <div class='recommandation'>
-            <b>{niveau_message}</b>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # Recommandation supplémentaire
-    st.markdown(f"""
-        <div class='recommandation'>
-            {recommandation}
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # Proposition de formation avec lien
-    st.markdown(f"""
-        ---
-        🎓 **Continuez votre parcours !**
-        
-        Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Cela démontre une forte compatibilité avec nos formations avancées qui vous permettront de devenir un véritable **pro de l'IA**.
-        
-        👉 [Découvrez nos formations](https://insidegroup.fr/actualites/acculturation-ia/)
-    """)
-    
-    # Bouton pour recommencer l'évaluation
-    st.markdown("<div class='button-container'>", unsafe_allow_html=True)
-    if st.button("🔄 Recommencer l'évaluation"):
-        reset_evaluation()
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
 
-# Fonction pour réinitialiser l'évaluation
-def reset_evaluation():
-    st.session_state["responses"] = {}
-    st.session_state["question_number"] = 0
-    st.session_state["show_results"] = False
+    # Création du contenu HTML complet pour la page des résultats
+    html_content = f"""
+    <div class='result-container'>
+        <div class='icon'>🌟</div>
+        <div class='result-title'>**Félicitations !**</div>
+        <h3>🔢 Votre Niveau d'Acculturation à l'IA: **{pourcentage:.1f}%**</h3>
+        <h3>**{niveau}**</h3>
+        <br>
+        <div>
+            <!-- Le graphique radar sera inséré ici -->
+        </div>
+        <br>
+        <p class='motivation-message'><b>{niveau_message}</b></p>
+        <hr>
+        <h3>🎓 Continuez votre parcours !</h3>
+        <p>{recommandation}</p>
+        <p>👉 <a href="https://insidegroup.fr/actualites/acculturation-ia/" style="color: #81c784;">Découvrez nos formations</a></p>
+        <hr>
+        <div class='button-container'>
+            <button style="
+                background-color: #f44336; 
+                color: white; 
+                padding: 10px 20px; 
+                text-align: center; 
+                text-decoration: none; 
+                display: inline-block; 
+                font-size: 16px; 
+                border: none; 
+                border-radius: 5px;
+                cursor: pointer;" onclick="window.location.reload();">
+                🔄 Recommencer l'évaluation
+            </button>
+        </div>
+    </div>
+    """
+
+    # Afficher le contenu HTML de la page des résultats
+    st.markdown(html_content, unsafe_allow_html=True)
+
+    # Afficher le graphique radar
+    st.plotly_chart(fig, use_container_width=True)
 
 # Affichage des questions ou des résultats selon l'état
 if not st.session_state["show_results"]:
