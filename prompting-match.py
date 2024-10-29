@@ -6,7 +6,7 @@ st.set_page_config(
     page_title="L'IA, c'est pour moi ?",
     page_icon="🤖",
     layout="centered",
-    initial_sidebar_state="auto",
+    initial_sidebar_state="collapsed",
 )
 
 # Styles personnalisés
@@ -14,25 +14,27 @@ st.markdown("""
     <style>
     /* Style général de la page */
     body {
-        background-color: #121212;
+        background-color: #1a1a1a;
         color: #ffffff;
     }
     /* Style pour les conteneurs de questions */
     .question-container {
         padding: 20px;
-        background-color: #1e1e1e;
+        background-color: #2c2c2c;
         border-radius: 10px;
         margin-bottom: 20px;
         color: #ffffff;
     }
     /* Style pour le conteneur des résultats */
     .result-container {
-        padding: 30px;
-        background-color: #1a237e;
+        padding: 40px;
+        background-color: #2c2c2c;
         border-radius: 15px;
         text-align: center;
         color: #ffffff;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        max-width: 800px;
+        margin: auto;
     }
     /* Style pour les boutons */
     .button-container {
@@ -42,6 +44,7 @@ st.markdown("""
     /* Style pour les textes d'erreur */
     .error-message {
         color: #ff1744;
+        font-size: 0.9em;
     }
     /* Style pour le bouton "Découvrez nos formations" en haut à droite */
     .top-right-button {
@@ -57,7 +60,7 @@ st.markdown("""
         justify-content: space-between;
         padding: 0;
         margin-bottom: 20px;
-        font-size: 0.8em; /* Réduction de la taille du texte */
+        font-size: 0.9em;
     }
     .breadcrumb li {
         flex: 1;
@@ -83,14 +86,19 @@ st.markdown("""
     }
     /* Style pour les icônes */
     .icon {
-        font-size: 3em;
+        font-size: 4em;
         margin-bottom: 10px;
     }
     /* Style pour les messages motivants */
     .motivation-message {
-        font-size: 1.1em;
-        margin-top: 10px;
+        font-size: 1.2em;
+        margin-top: 20px;
         color: #81c784;
+    }
+    /* Style pour les titres */
+    .result-title {
+        font-size: 2em;
+        margin-top: 10px;
     }
     /* Responsive adjustments */
     @media (max-width: 600px) {
@@ -135,14 +143,12 @@ st.markdown("""
 st.markdown("# 🤖 L'IA, c'est pour moi ?")
 
 # Initialisation de l'état de session avec setdefault pour éviter KeyError
-for key in ["responses", "question_number", "show_results"]:
-    if key not in st.session_state:
-        if key == "responses":
-            st.session_state[key] = {}
-        elif key == "question_number":
-            st.session_state[key] = 0
-        elif key == "show_results":
-            st.session_state[key] = False
+if 'responses' not in st.session_state:
+    st.session_state['responses'] = {}
+if 'question_number' not in st.session_state:
+    st.session_state['question_number'] = 0
+if 'show_results' not in st.session_state:
+    st.session_state['show_results'] = False
 
 # Définition des questions avec thèmes, emojis et options adaptées
 questions = [
@@ -238,6 +244,12 @@ def display_question(question_data, question_num):
     if selected == "Sélectionnez une réponse":
         st.markdown("<span class='error-message'>Veuillez sélectionner une réponse valide.</span>", unsafe_allow_html=True)
 
+# Fonction pour réinitialiser l'évaluation
+def reset_evaluation():
+    st.session_state["responses"] = {}
+    st.session_state["question_number"] = 0
+    st.session_state["show_results"] = False
+
 # Fonction pour afficher les résultats
 def display_results():
     st.markdown("<div class='result-container'>", unsafe_allow_html=True)
@@ -246,7 +258,7 @@ def display_results():
     st.markdown("<div class='icon'>🌟</div>", unsafe_allow_html=True)
     
     # Titre de félicitations
-    st.markdown("**Félicitations !**", unsafe_allow_html=True)
+    st.markdown("<div class='result-title'>**Félicitations !**</div>", unsafe_allow_html=True)
     
     # Calcul des scores pour le graphique radar
     competence_scores = {}
@@ -355,45 +367,6 @@ def display_results():
     st.markdown("</div>", unsafe_allow_html=True)
     
     st.markdown("</div>", unsafe_allow_html=True)
-
-# Fonction pour réinitialiser l'évaluation
-def reset_evaluation():
-    st.session_state["responses"] = {}
-    st.session_state["question_number"] = 0
-    st.session_state["show_results"] = False
-
-# Fonction pour afficher une question avec fil d'Ariane
-def display_question(question_data, question_num):
-    theme = question_data["theme"]
-    question_text = question_data["question"]
-    choices = question_data["choices"]
-
-    # Création du fil d'Ariane avec thèmes
-    breadcrumb = '<ul class="breadcrumb">'
-    for i in range(1, len(questions)+1):
-        current_theme = questions[i-1]["theme"]
-        if i < question_num:
-            breadcrumb += f'<li><span class="active">{current_theme}</span></li>'
-        elif i == question_num:
-            breadcrumb += f'<li><span class="active">{current_theme}</span></li>'
-        else:
-            breadcrumb += f'<li>{current_theme}</li>'
-    breadcrumb += '</ul>'
-    st.markdown(breadcrumb, unsafe_allow_html=True)
-    
-    # Affichage de la question
-    st.markdown(f"<div class='question-container'><b>{question_text}</b></div>", unsafe_allow_html=True)
-    
-    # Gestion des réponses avec callback
-    def on_change():
-        selected = st.session_state[f"response_{question_num}"]
-        if selected != "Sélectionnez une réponse":
-            save_response(selected, question_num)
-    
-    selected = st.radio("Sélectionnez une réponse :", choices, key=f"response_{question_num}", on_change=on_change)
-    
-    if selected == "Sélectionnez une réponse":
-        st.markdown("<span class='error-message'>Veuillez sélectionner une réponse valide.</span>", unsafe_allow_html=True)
 
 # Fonction pour afficher les questions
 def display_questions():
