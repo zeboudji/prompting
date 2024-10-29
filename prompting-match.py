@@ -42,6 +42,20 @@ st.markdown("""
     .error-message {
         color: #ff1744;
     }
+    /* Style pour la barre de progression */
+    .progress-bar {
+        height: 20px;
+        background-color: #1e1e1e;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    .progress-bar-inner {
+        height: 100%;
+        background-color: #4caf50;
+        width: 0%;
+        transition: width 0.5s;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -54,26 +68,26 @@ if "responses" not in st.session_state:
     st.session_state["question_number"] = 0
     st.session_state["show_results"] = False
 
-# Définition des questions avec emojis et options
+# Définition des questions avec emojis et options adaptées au métier
 questions = [
-    ("🌱 **Quel est votre niveau de familiarité avec l’écriture de prompts pour l’IA ?**",
+    ("🔧 **Est-ce que dans votre métier, vous utilisez régulièrement des outils d'IA pour automatiser des tâches ?**",
      ["Sélectionnez une réponse", "🔰 Débutant(e)", "📘 Intermédiaire", "🌟 Avancé(e)"]),
-    ("🧩 **Utilisez-vous déjà des techniques d’expression de besoin comme les User Stories ou les Epics ?**",
-     ["Sélectionnez une réponse", "✅ Oui", "📙 Non, mais curieux(se) d’en apprendre plus", "❓ Pas familier(e) avec ces termes"]),
-    ("🔍 **Comment définiriez-vous votre capacité à exprimer des besoins clairs et spécifiques pour une tâche ?**",
+    ("📊 **Est-ce que vous intégrez des analyses de données avancées dans vos projets actuels ?**",
+     ["Sélectionnez une réponse", "✅ Oui", "📙 Non, mais curieux(se) d’en apprendre plus", "❓ Pas familier(e) avec ces concepts"]),
+    ("📝 **Comment évalueriez-vous votre capacité à rédiger des prompts clairs et précis pour l'IA dans votre travail quotidien ?**",
      ["Sélectionnez une réponse", "📝 Très clair et structuré", "📄 Clair, mais manque parfois de détails", "⚠️ Besoin d’amélioration"]),
-    ("📐 **Savez-vous diviser une tâche en plusieurs étapes pour aider l’IA à répondre plus précisément ?**",
+    ("🔄 **Dans quelle mesure savez-vous diviser un projet complexe en étapes plus petites pour faciliter l'interaction avec l'IA ?**",
      ["Sélectionnez une réponse", "✔️ Oui, j’utilise cette approche régulièrement", "🔄 J’ai quelques idées, mais je pourrais m’améliorer", "❌ Non, je ne suis pas sûr(e) de comment faire"]),
-    ("🎯 **Comment évalueriez-vous votre capacité à adapter le ton du prompt au contexte ?**",
+    ("🗣 **Comment évalueriez-vous votre capacité à adapter le ton et le style des prompts en fonction du contexte de votre projet ?**",
      ["Sélectionnez une réponse", "🗣 Très adaptable", "😊 Souvent adaptable", "🛑 Peu adaptable"]),
-    ("🎯 **Comment évalueriez-vous votre capacité à structurer les réponses pour obtenir des informations claires et organisées ?**",
+    ("📈 **Comment évalueriez-vous votre capacité à structurer les réponses de l'IA pour obtenir des informations claires et organisées dans vos rapports ou présentations ?**",
      ["Sélectionnez une réponse", "📊 Très structuré", "📈 Parfois structuré", "🚧 Peu structuré"])
 ]
 
 # Mapping des réponses à un score numérique pour le graphique radar
 responses_scores = {
     "🔰 Débutant(e)": 1, "📘 Intermédiaire": 2, "🌟 Avancé(e)": 3,
-    "❓ Pas familier(e) avec ces termes": 1, "📙 Non, mais curieux(se) d’en apprendre plus": 2, "✅ Oui": 3,
+    "❓ Pas familier(e) avec ces concepts": 1, "📙 Non, mais curieux(se) d’en apprendre plus": 2, "✅ Oui": 3,
     "⚠️ Besoin d’amélioration": 1, "📄 Clair, mais manque parfois de détails": 2, "📝 Très clair et structuré": 3,
     "❌ Non, je ne suis pas sûr(e) de comment faire": 1, "🔄 J’ai quelques idées, mais je pourrais m’améliorer": 2, "✔️ Oui, j’utilise cette approche régulièrement": 3,
     "🛑 Peu adaptable": 1, "😊 Souvent adaptable": 2, "🗣 Très adaptable": 3,
@@ -84,11 +98,14 @@ def save_response(response, question_num):
     """Sauvegarder la réponse et passer à la question suivante"""
     st.session_state["responses"][f"Question {question_num}"] = response
     st.session_state["question_number"] += 1
-    if st.session_state["question_number"] >= len(questions):
-        st.session_state["show_results"] = True
+    # Mettre à jour la barre de progression
+    st.experimental_rerun()
 
 # Fonction pour afficher une question
 def display_question(question_text, choices, question_num):
+    # Calcul du pourcentage d'avancement
+    progress = (question_num / len(questions)) * 100
+    st.markdown(f"<div class='progress-bar'><div class='progress-bar-inner' style='width: {progress}%;'></div></div>", unsafe_allow_html=True)
     st.markdown(f"<div class='question-container'><b>{question_text}</b></div>", unsafe_allow_html=True)
     
     def on_change():
@@ -102,13 +119,10 @@ def display_question(question_text, choices, question_num):
 
 # Fonction pour afficher les résultats
 def display_results():
-    st.markdown("<div class='result-container'><h2>🌟 Félicitations ! 🌟</h2></div>", unsafe_allow_html=True)
-    st.balloons()
-    
     # Calcul des scores pour le graphique radar
     competence_scores = {
         "Familiarité": responses_scores.get(st.session_state["responses"].get("Question 1", "🔰 Débutant(e)"), 1),
-        "Expérience Agile": responses_scores.get(st.session_state["responses"].get("Question 2", "❓ Pas familier(e) avec ces termes"), 1),
+        "Expérience Agile": responses_scores.get(st.session_state["responses"].get("Question 2", "❓ Pas familier(e) avec ces concepts"), 1),
         "Clarté": responses_scores.get(st.session_state["responses"].get("Question 3", "⚠️ Besoin d’amélioration"), 1),
         "Diviser une Tâche": responses_scores.get(st.session_state["responses"].get("Question 4", "❌ Non, je ne suis pas sûr(e) de comment faire"), 1),
         "Adaptabilité du Ton": responses_scores.get(st.session_state["responses"].get("Question 5", "🛑 Peu adaptable"), 1),
@@ -123,8 +137,17 @@ def display_results():
     max_score = len(values) * 3
     pourcentage = (total_score / max_score) * 100
     
-    # Afficher le pourcentage au-dessus du radar
+    # Détermination du niveau basé sur le pourcentage
+    if pourcentage < 60:
+        niveau = "🎓 Sensibilisation à l'IA"
+        niveau_message = "Vous êtes éligible à la **Sensibilisation** pour mieux comprendre les fondamentaux de l'IA."
+    else:
+        niveau = "🚀 Acculturation pour devenir un AS de l'IA"
+        niveau_message = "Félicitations ! Vous êtes éligible à l'**Acculturation** pour devenir un **AS de l'IA**."
+    
+    # Afficher le pourcentage et le niveau
     st.markdown(f"### 🔢 Votre Niveau de Connaissance en IA: **{pourcentage:.1f}%**")
+    st.markdown(f"### **{niveau}**")
     
     # Création du graphique radar avec Plotly
     fig = go.Figure(data=go.Scatterpolar(
@@ -151,12 +174,19 @@ def display_results():
     
     st.plotly_chart(fig, use_container_width=True)
     
+    # Message de niveau
+    st.markdown(f"""
+        <div style='text-align: center; padding: 10px;'>
+            <b>{niveau_message}</b>
+        </div>
+    """, unsafe_allow_html=True)
+    
     # Proposition de formation
     st.markdown(f"""
         ---
-        🎓 **Félicitations !** 🎓
+        🎓 **Continuez votre parcours !**
         
-        Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Cela démontre une forte compatibilité avec nos formations avancées qui vous permettront de devenir un véritable **pro de l'IA**.
+        Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Pour approfondir vos connaissances et compétences en IA et en prompting, découvrez nos **formations personnalisées** adaptées à votre niveau.
         
         👉 [Découvrez nos formations](https://votre-site.com/formations)
     """)
