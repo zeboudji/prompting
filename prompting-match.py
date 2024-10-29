@@ -6,7 +6,7 @@ st.set_page_config(
     page_title="🚀 Niveau d'acculturation à l'IA",
     page_icon="🚀",
     layout="centered",
-    initial_sidebar_state="auto",
+    initial_sidebar_state="collapsed",
 )
 
 # Styles personnalisés
@@ -14,13 +14,13 @@ st.markdown("""
     <style>
     /* Style général de la page */
     body {
-        background-color: #1a1a1a;
+        background-color: #121212;
         color: #ffffff;
     }
     /* Style pour les conteneurs de questions */
     .question-container {
         padding: 20px;
-        background-color: #2c2c2c;
+        background-color: #1e1e1e;
         border-radius: 10px;
         margin-bottom: 20px;
         color: #ffffff;
@@ -233,7 +233,7 @@ def display_results():
     # Calcul des scores pour le graphique radar
     competence_scores = {}
     for idx, q in enumerate(questions, 1):
-        response = st.session_state["responses"].get(f"Question {idx}", "🔰 Rarement")
+        response = st.session_state["responses"].get(f"Question {idx}", "Sélectionnez une réponse")
         # Calculer le score basé sur l'index de la réponse
         # Les choix sont ["Sélectionnez une réponse", "Option 1", "Option 2", "Option 3"]
         # Donc l'index 1 correspond à score 1, index 2 à score 2, etc.
