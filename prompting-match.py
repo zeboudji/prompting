@@ -213,6 +213,8 @@ def save_response(response, question_num):
     # Si c'est la dernière question, afficher les résultats
     if st.session_state["question_number"] >= len(questions):
         st.session_state["show_results"] = True
+    # Forcer le rerun pour afficher la prochaine question immédiatement
+    st.experimental_rerun()
 
 # Fonction pour afficher une question avec fil d'Ariane
 def display_question(question_data, question_num):
