@@ -42,20 +42,6 @@ st.markdown("""
     .error-message {
         color: #ff1744;
     }
-    /* Style pour la barre de progression */
-    .progress-bar {
-        height: 20px;
-        background-color: #1e1e1e;
-        border-radius: 10px;
-        overflow: hidden;
-        margin-bottom: 20px;
-    }
-    .progress-bar-inner {
-        height: 100%;
-        background-color: #4caf50;
-        width: 0%;
-        transition: width 0.5s;
-    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -98,14 +84,13 @@ def save_response(response, question_num):
     """Sauvegarder la réponse et passer à la question suivante"""
     st.session_state["responses"][f"Question {question_num}"] = response
     st.session_state["question_number"] += 1
-    # Mettre à jour la barre de progression
-    st.experimental_rerun()
 
 # Fonction pour afficher une question
 def display_question(question_text, choices, question_num):
     # Calcul du pourcentage d'avancement
     progress = (question_num / len(questions)) * 100
-    st.markdown(f"<div class='progress-bar'><div class='progress-bar-inner' style='width: {progress}%;'></div></div>", unsafe_allow_html=True)
+    st.progress(progress)
+    
     st.markdown(f"<div class='question-container'><b>{question_text}</b></div>", unsafe_allow_html=True)
     
     def on_change():
@@ -114,11 +99,15 @@ def display_question(question_text, choices, question_num):
             save_response(selected, question_num)
     
     selected = st.radio("Sélectionnez une réponse :", choices, key=f"response_{question_num}", on_change=on_change)
+    
     if selected == "Sélectionnez une réponse":
         st.markdown("<span class='error-message'>Veuillez sélectionner une réponse valide.</span>", unsafe_allow_html=True)
 
 # Fonction pour afficher les résultats
 def display_results():
+    st.markdown("<div class='result-container'><h2>🌟 Félicitations ! 🌟</h2></div>", unsafe_allow_html=True)
+    st.balloons()
+    
     # Calcul des scores pour le graphique radar
     competence_scores = {
         "Familiarité": responses_scores.get(st.session_state["responses"].get("Question 1", "🔰 Débutant(e)"), 1),
@@ -181,14 +170,14 @@ def display_results():
         </div>
     """, unsafe_allow_html=True)
     
-    # Proposition de formation
+    # Proposition de formation avec lien
     st.markdown(f"""
         ---
         🎓 **Continuez votre parcours !**
         
-        Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Pour approfondir vos connaissances et compétences en IA et en prompting, découvrez nos **formations personnalisées** adaptées à votre niveau.
+        Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Cela démontre une forte compatibilité avec nos formations avancées qui vous permettront de devenir un véritable **pro de l'IA**.
         
-        👉 [Découvrez nos formations](https://votre-site.com/formations)
+        👉 [Découvrez nos formations](https://insidegroup.fr/actualites/acculturation-ia/)
     """)
     
     # Bouton pour recommencer l'évaluation
@@ -213,7 +202,6 @@ if not st.session_state["show_results"]:
         display_question(question_text, choices, current_question_num)
     else:
         st.session_state["show_results"] = True
-        st.experimental_rerun()
 
 if st.session_state["show_results"]:
     display_results()
