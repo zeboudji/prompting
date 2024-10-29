@@ -35,7 +35,7 @@ st.markdown("""
     /* Style pour le bouton "Découvrez nos formations" en haut à droite */
     .top-right-button {
         position: fixed;
-        top: 20px;
+        top: 80px;
         right: 20px;
         z-index: 1000;
     }
