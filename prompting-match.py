@@ -3,8 +3,7 @@ import plotly.graph_objects as go
 
 # Configuration de la page
 st.set_page_config(
-    page_title="L'IA, est ce pour moi ? ",
-    page_title="Calculez votre score de compatibilité avec l'IA et découvrez si vous êtes déjà prêt, sans même le savoir !",
+    page_title="L'IA, est-ce pour moi ?",
     page_icon="🚀",
     layout="centered",
     initial_sidebar_state="collapsed",
@@ -58,8 +57,8 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# Titre principal
-st.markdown("# 🚀 L'IA, est-ce pour moi ?")
+# Affichage du sous-titre
+st.title("L'IA, est-ce pour moi ?")
 st.subheader("Calculez votre score de compatibilité avec l'IA et découvrez si vous êtes déjà prêt, sans même le savoir ! 🚀")
 
 # Initialisation de l'état de session avec setdefault pour éviter KeyError
