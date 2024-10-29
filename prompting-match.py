@@ -13,7 +13,7 @@ st.set_page_config(
 st.markdown("""
     <style>
     /* Style général de la page */
-    .main {
+    body {
         background-color: #121212;
         color: #ffffff;
     }
@@ -81,46 +81,6 @@ st.markdown("""
         font-weight: bold;
         color: #4CAF50;
     }
-    /* Style pour les cartes */
-    .card {
-        background-color: #1e1e1e;
-        border-radius: 10px;
-        padding: 20px;
-        text-align: center;
-        color: #ffffff;
-        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-        transition: 0.3s;
-        cursor: pointer;
-    }
-    .card:hover {
-        background-color: #2e7d32;
-    }
-    /* Style pour le titre des cartes */
-    .card-title {
-        font-size: 1.5em;
-        margin-bottom: 10px;
-    }
-    /* Style pour les descriptions des cartes */
-    .card-description {
-        font-size: 1em;
-        color: #cccccc;
-    }
-    /* Style pour le graphique radar */
-    .radar-title {
-        text-align: center;
-        color: #ffffff;
-        margin-bottom: -30px;
-    }
-    /* Style pour le niveau */
-    .niveau {
-        font-size: 1.2em;
-        margin-top: 10px;
-    }
-    /* Style pour les recommandations */
-    .recommandation {
-        font-size: 1em;
-        margin-top: 20px;
-    }
     /* Style pour les icônes */
     .icon {
         font-size: 3em;
@@ -131,6 +91,21 @@ st.markdown("""
         font-size: 1.1em;
         margin-top: 10px;
         color: #81c784;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+        .breadcrumb {
+            flex-direction: column;
+            align-items: center;
+        }
+        .breadcrumb li::after {
+            width: 2px;
+            height: 100%;
+            top: -50%;
+            left: 50%;
+            right: auto;
+            transform: rotate(90deg);
+        }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -276,7 +251,7 @@ def display_results():
     # Calcul des scores pour le graphique radar
     competence_scores = {}
     for idx, q in enumerate(questions, 1):
-        response = st.session_state["responses"].get(f"Question {idx}", "🔰 Rarement")
+        response = st.session_state["responses"].get(f"Question {idx}", "🔰 Jamais")
         score = responses_scores.get(response, 1)
         theme = q["theme"]
         competence_scores[theme] = score
@@ -368,7 +343,7 @@ def display_results():
         ---
         🎓 **Continuez votre parcours !**
         
-        Avec un score de **{pourcentage:.1f}%**, vous êtes bien positionné pour tirer parti de nos formations avancées qui vous aideront à intégrer l'IA de manière efficace dans votre métier.
+        Avec un score de **{pourcentage:.1f}%**, vous disposez déjà de nombreux prérequis pour intégrer l'IA dans votre quotidien. Nos formations avancées vous aideront à exploiter pleinement le potentiel de l'intelligence artificielle dans votre métier.
         
         👉 [Découvrez nos formations](https://insidegroup.fr/actualites/acculturation-ia/)
     """)
