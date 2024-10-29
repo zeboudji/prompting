@@ -113,15 +113,19 @@ def save_response(response, question_num):
 # Fonction pour afficher une question sous forme d'accordéon
 def display_question_accordion():
     for idx, question_data in enumerate(questions):
-        with st.expander(f"{question_data['theme']}"):  # Création d'un accordéon pour chaque question
-            question_text = question_data["question"]
-            choices = question_data["choices"]
-            selected = st.radio(question_text, choices, key=f"response_{idx}")
-            if st.button("Valider", key=f"submit_{idx}"):
-                if selected != "Sélectionnez une réponse":
-                    save_response(selected, idx)
-                else:
-                    st.warning("Veuillez sélectionner une réponse valide avant de continuer.")
+        if idx == st.session_state["question_number"]:
+            with st.expander(f"{question_data['theme']}", expanded=True):  # Créer un accordéon pour la question courante
+                question_text = question_data["question"]
+                choices = question_data["choices"]
+                selected = st.radio(question_text, choices, key=f"response_{idx}")
+                if st.button("Valider", key=f"submit_{idx}"):
+                    if selected != "Sélectionnez une réponse":
+                        save_response(selected, idx)
+                    else:
+                        st.warning("Veuillez sélectionner une réponse valide avant de continuer.")
+        else:
+            with st.expander(f"{question_data['theme']}", expanded=False):
+                st.markdown(f"**{question_data['question']}**")
 
 # Fonction pour réinitialiser l'évaluation
 def reset_evaluation():
