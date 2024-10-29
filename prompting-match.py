@@ -117,12 +117,7 @@ def display_question_accordion():
             with st.expander(f"{question_data['theme']}", expanded=True):  # Créer un accordéon pour la question courante
                 question_text = question_data["question"]
                 choices = question_data["choices"]
-                selected = st.radio(question_text, choices, key=f"response_{idx}")
-                if st.button("Valider", key=f"submit_{idx}"):
-                    if selected != "Sélectionnez une réponse":
-                        save_response(selected, idx)
-                    else:
-                        st.warning("Veuillez sélectionner une réponse valide avant de continuer.")
+                selected = st.radio(question_text, choices, key=f"response_{idx}", on_change=lambda: save_response(st.session_state[f"response_{idx}"], idx))
         else:
             with st.expander(f"{question_data['theme']}", expanded=False):
                 st.markdown(f"**{question_data['question']}**")
