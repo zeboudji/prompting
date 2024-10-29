@@ -72,33 +72,33 @@ if "show_results" not in st.session_state:
 questions = [
     {
         "theme": "Compréhension des Concepts",
-        "question": "🗣️ **Dans votre métier, vous arrive-t-il d'exprimer des besoins spécifiques à votre équipe ou à votre supérieur ?**",
+        "question": "🗣️ Dans votre métier, vous arrive-t-il d'exprimer des besoins spécifiques à votre équipe ou à votre supérieur ?",
         "choices": ["Sélectionner une réponse","🔰 Rarement", "📚 Parfois", "🌟 Fréquemment"]
     },
     {
         "theme": "Identification des Besoins",
-        "question": "📋 **Est-ce que vous avez l'habitude de récolter les besoins de vos clients ou de vos collègues pour définir des projets ?**",
-        "choices": ["🔰 Jamais", "📚 Occasionnellement", "🌟 Régulièrement"]
+        "question": "📋 Est-ce que vous avez l'habitude de récolter les besoins de vos clients ou de vos collègues pour définir des projets ?",
+        "choices": ["Sélectionner une réponse","🔰 Jamais", "📚 Occasionnellement", "🌟 Régulièrement"]
     },
     {
         "theme": "Connaissance de l'Agilité",
-        "question": "⚡ **Le concept d'agilité en gestion de projet vous est-il familier ?**",
-        "choices": ["🔰 Pas du tout", "📚 Un peu", "🌟 Oui, je l'applique régulièrement"]
+        "question": "⚡ Le concept d'agilité en gestion de projet vous est-il familier ?**",
+        "choices": ["Sélectionner une réponse","🔰 Pas du tout", "📚 Un peu", "🌟 Oui, je l'applique régulièrement"]
     },
     {
         "theme": "Utilisation des Outils IA",
-        "question": "🤖 **Utilisez-vous des outils d'intelligence artificielle (IA) pour améliorer votre efficacité au travail ?**",
-        "choices": ["🔰 Jamais", "📚 Parfois", "🌟 Fréquemment"]
+        "question": "🤖 Utilisez-vous des outils d'intelligence artificielle (IA) pour améliorer votre efficacité au travail ?",
+        "choices": ["Sélectionner une réponse","🔰 Jamais", "📚 Parfois", "🌟 Fréquemment"]
     },
     {
         "theme": "Rédaction de Prompts",
-        "question": "📝 **Avez-vous déjà rédigé des prompts pour interagir avec des outils d'IA comme ChatGPT ?**",
-        "choices": ["🔰 Jamais", "📚 Rarement", "🌟 Souvent"]
+        "question": "📝 Avez-vous déjà rédigé des prompts pour interagir avec des outils d'IA comme ChatGPT ?",
+        "choices": ["Sélectionner une réponse","🔰 Jamais", "📚 Rarement", "🌟 Souvent"]
     },
     {
         "theme": "Structuration des Informations",
-        "question": "📊 **Comment évaluez-vous votre capacité à organiser les informations fournies par un outil d'IA dans vos rapports ou présentations ?**",
-        "choices": ["🔰 Peu structuré", "📚 Moyennement structuré", "🌟 Très structuré"]
+        "question": "📊 **Comment évaluez-vous votre capacité à organiser les informations fournies par un outil d'IA dans vos rapports ou présentations ?",
+        "choices": ["Sélectionner une réponse","🔰 Peu structuré", "📚 Moyennement structuré", "🌟 Très structuré"]
     }
 ]
 
