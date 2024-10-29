@@ -104,7 +104,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # Titre principal
-st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
+st.markdown("# 🚀 Évaluation Interactive des Compétences en IA et IA Assistée")
 
 # Initialisation de l'état de session
 if "responses" not in st.session_state:
@@ -114,28 +114,28 @@ if "responses" not in st.session_state:
 
 # Définition des questions avec emojis et options adaptées au métier
 questions = [
-    ("🔧 **Est-ce que dans votre métier, vous utilisez régulièrement des outils d'IA pour automatiser des tâches ?**",
-     ["Sélectionnez une réponse", "🔰 Débutant(e)", "📘 Intermédiaire", "🌟 Avancé(e)"]),
-    ("📊 **Est-ce que vous intégrez des analyses de données avancées dans vos projets actuels ?**",
-     ["Sélectionnez une réponse", "✅ Oui", "📙 Non, mais curieux(se) d’en apprendre plus", "❓ Pas familier(e) avec ces concepts"]),
-    ("📝 **Comment évalueriez-vous votre capacité à rédiger des prompts clairs et précis pour l'IA dans votre travail quotidien ?**",
-     ["Sélectionnez une réponse", "📝 Très clair et structuré", "📄 Clair, mais manque parfois de détails", "⚠️ Besoin d’amélioration"]),
-    ("🔄 **Dans quelle mesure savez-vous diviser un projet complexe en étapes plus petites pour faciliter l'interaction avec l'IA ?**",
-     ["Sélectionnez une réponse", "✔️ Oui, j’utilise cette approche régulièrement", "🔄 J’ai quelques idées, mais je pourrais m’améliorer", "❌ Non, je ne suis pas sûr(e) de comment faire"]),
-    ("🗣 **Comment évalueriez-vous votre capacité à adapter le ton et le style des prompts en fonction du contexte de votre projet ?**",
-     ["Sélectionnez une réponse", "🗣 Très adaptable", "😊 Souvent adaptable", "🛑 Peu adaptable"]),
-    ("📈 **Comment évalueriez-vous votre capacité à structurer les réponses de l'IA pour obtenir des informations claires et organisées dans vos rapports ou présentations ?**",
-     ["Sélectionnez une réponse", "📊 Très structuré", "📈 Parfois structuré", "🚧 Peu structuré"])
+    ("🔍 **À quel point êtes-vous à l'aise avec l'utilisation des technologies numériques dans votre travail actuel ?**",
+     ["Sélectionnez une réponse", "🟢 Très à l'aise", "🟡 Assez à l'aise", "🔴 Peu à l'aise"]),
+    ("💼 **Dans quelle mesure votre emploi actuel implique-t-il l'utilisation de logiciels ou d'outils automatisés ?**",
+     ["Sélectionnez une réponse", "🟢 Fréquemment", "🟡 Parfois", "🔴 Rarement"]),
+    ("📚 **Quelle est votre expérience avec les technologies d'intelligence artificielle (IA) ou d'apprentissage automatique (Machine Learning) ?**",
+     ["Sélectionnez une réponse", "🟢 Expérimenté(e)", "🟡 Connaissances de base", "🔴 Aucune expérience"]),
+    ("📝 **Comment évaluez-vous votre capacité à apprendre et à adopter de nouvelles technologies dans votre domaine ?**",
+     ["Sélectionnez une réponse", "🟢 Très bonne", "🟡 Moyenne", "🔴 Faible"]),
+    ("🤖 **Dans quelle mesure pensez-vous que l'IA pourrait améliorer l'efficacité de votre travail ?**",
+     ["Sélectionnez une réponse", "🟢 Beaucoup", "🟡 Modérément", "🔴 Peu"]),
+    ("🎯 **Quels aspects de votre travail actuel pensez-vous pourraient bénéficier d'une automatisation ou d'une assistance par l'IA ?**",
+     ["Sélectionnez une réponse", "🟢 Tâches répétitives", "🟡 Analyse de données", "🔴 Créativité et prise de décision"])
 ]
 
 # Mapping des réponses à un score numérique pour le graphique radar
 responses_scores = {
-    "🔰 Débutant(e)": 1, "📘 Intermédiaire": 2, "🌟 Avancé(e)": 3,
-    "❓ Pas familier(e) avec ces concepts": 1, "📙 Non, mais curieux(se) d’en apprendre plus": 2, "✅ Oui": 3,
-    "⚠️ Besoin d’amélioration": 1, "📄 Clair, mais manque parfois de détails": 2, "📝 Très clair et structuré": 3,
-    "❌ Non, je ne suis pas sûr(e) de comment faire": 1, "🔄 J’ai quelques idées, mais je pourrais m’améliorer": 2, "✔️ Oui, j’utilise cette approche régulièrement": 3,
-    "🛑 Peu adaptable": 1, "😊 Souvent adaptable": 2, "🗣 Très adaptable": 3,
-    "🚧 Peu structuré": 1, "📈 Parfois structuré": 2, "📊 Très structuré": 3
+    "🟢 Très à l'aise": 3, "🟡 Assez à l'aise": 2, "🔴 Peu à l'aise": 1,
+    "🟢 Fréquemment": 3, "🟡 Parfois": 2, "🔴 Rarement": 1,
+    "🟢 Expérimenté(e)": 3, "🟡 Connaissances de base": 2, "🔴 Aucune expérience": 1,
+    "🟢 Très bonne": 3, "🟡 Moyenne": 2, "🔴 Faible": 1,
+    "🟢 Beaucoup": 3, "🟡 Modérément": 2, "🔴 Peu": 1,
+    "🟢 Tâches répétitives": 3, "🟡 Analyse de données": 2, "🔴 Créativité et prise de décision": 1
 }
 
 def save_response(response, question_num):
@@ -176,12 +176,12 @@ def display_results():
     
     # Calcul des scores pour le graphique radar
     competence_scores = {
-        "Familiarité": responses_scores.get(st.session_state["responses"].get("Question 1", "🔰 Débutant(e)"), 1),
-        "Expérience Agile": responses_scores.get(st.session_state["responses"].get("Question 2", "❓ Pas familier(e) avec ces concepts"), 1),
-        "Clarté": responses_scores.get(st.session_state["responses"].get("Question 3", "⚠️ Besoin d’amélioration"), 1),
-        "Diviser une Tâche": responses_scores.get(st.session_state["responses"].get("Question 4", "❌ Non, je ne suis pas sûr(e) de comment faire"), 1),
-        "Adaptabilité du Ton": responses_scores.get(st.session_state["responses"].get("Question 5", "🛑 Peu adaptable"), 1),
-        "Structure des Réponses": responses_scores.get(st.session_state["responses"].get("Question 6", "🚧 Peu structuré"), 1)
+        "Confort Numérique": responses_scores.get(st.session_state["responses"].get("Question 1", "🔴 Peu à l'aise"), 1),
+        "Utilisation d'Outils Automatisés": responses_scores.get(st.session_state["responses"].get("Question 2", "🔴 Rarement"), 1),
+        "Expérience avec l'IA": responses_scores.get(st.session_state["responses"].get("Question 3", "🔴 Aucune expérience"), 1),
+        "Capacité d'Apprentissage": responses_scores.get(st.session_state["responses"].get("Question 4", "🔴 Faible"), 1),
+        "Impact de l'IA sur le Travail": responses_scores.get(st.session_state["responses"].get("Question 5", "🔴 Peu"), 1),
+        "Bénéfices Potentiels de l'IA": responses_scores.get(st.session_state["responses"].get("Question 6", "🔴 Créativité et prise de décision"), 1)
     }
     
     categories = list(competence_scores.keys())
@@ -213,7 +213,7 @@ def display_results():
     ))
     
     fig.update_layout(
-        title="🌟 Votre Radar de Compétences en Prompting IA 🌟",
+        title="🌟 Votre Radar de Compétences en IA 🌟",
         polar=dict(
             radialaxis=dict(
                 visible=True,
