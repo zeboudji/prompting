@@ -252,14 +252,6 @@ def reset_evaluation():
 
 # Fonction pour afficher les résultats
 def display_results():
-    st.markdown("<div class='result-container'>", unsafe_allow_html=True)
-    
-    # Icône de félicitations
-    st.markdown("<div class='icon'>🌟</div>", unsafe_allow_html=True)
-    
-    # Titre de félicitations
-    st.markdown("<div class='result-title'>**Félicitations !**</div>", unsafe_allow_html=True)
-    
     # Calcul des scores pour le graphique radar
     competence_scores = {}
     for idx, q in enumerate(questions, 1):
@@ -267,15 +259,15 @@ def display_results():
         score = responses_scores.get(response, 1)
         theme = q["theme"]
         competence_scores[theme] = score
-    
+
     categories = list(competence_scores.keys())
     values = list(competence_scores.values())
-    
+
     # Calcul du pourcentage de compatibilité
     total_score = sum(values)
     max_score = len(values) * 3
     pourcentage = (total_score / max_score) * 100
-    
+
     # Détermination du niveau basé sur le pourcentage avec messages motivants par tranche de 10%
     if pourcentage <= 10:
         niveau = "🟠 Très Faible Compatibilité"
@@ -307,66 +299,46 @@ def display_results():
     else:
         niveau = "🌟 Légende de l'IA"
         motivation_message = "Vous êtes une véritable légende de l'IA. Félicitations pour votre expertise inégalée et votre capacité à intégrer l'IA dans votre métier !"
-    
-    # Afficher le niveau avec une mise en page agréable
-    st.markdown(f"### 🔢 Votre Niveau de Compatibilité avec l'IA: **{pourcentage:.1f}%**", unsafe_allow_html=True)
-    st.markdown(f"### **{niveau}**", unsafe_allow_html=True)
-    
-    # Ajout d'un espace
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Création du graphique radar avec Plotly
-    fig = go.Figure(data=go.Scatterpolar(
-        r=values,
-        theta=categories,
-        fill='toself',
-        marker=dict(color='rgba(56, 128, 255, 0.6)')
-    ))
-    
-    fig.update_layout(
-        title="🌟 Votre Radar de Compatibilité avec l'IA 🌟",
-        polar=dict(
-            radialaxis=dict(
-                visible=True,
-                range=[0, 3],
-                tickvals=[0, 1, 2, 3],
-                ticktext=["0", "1", "2", "3"]
-            ),
-            angularaxis=dict(showline=True, linecolor="lightgrey")
-        ),
-        showlegend=False,
-        template="plotly_dark"
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
-    
-    # Ajout d'un espace
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Message de motivation
-    st.markdown(f"""
-        <div class='motivation-message'>
-            <b>{motivation_message}</b>
+
+    # Création du contenu HTML complet pour la page des résultats
+    html_content = f"""
+    <div class='result-container'>
+        <div class='icon'>🌟</div>
+        <div class='result-title'>**Félicitations !**</div>
+        <h3>🔢 Votre Niveau de Compatibilité avec l'IA: **{pourcentage:.1f}%**</h3>
+        <h3>**{niveau}**</h3>
+        <br>
+        <div>
+            <img src='https://i.imgur.com/your_image_link.png' alt='Radar de Compatibilité' style='width:100%; max-width:600px; margin: auto;'/>
+            <p><i>Votre Radar de Compatibilité avec l'IA</i></p>
         </div>
-    """, unsafe_allow_html=True)
-    
-    # Proposition de formation avec lien
-    st.markdown(f"""
-        ---
-        🎓 **Continuez votre parcours !**
-        
-        Avec un score de **{pourcentage:.1f}%**, vous disposez déjà de nombreux prérequis pour intégrer l'IA dans votre quotidien. Nos formations avancées vous aideront à exploiter pleinement le potentiel de l'intelligence artificielle dans votre métier.
-        
-        👉 [Découvrez nos formations](https://insidegroup.fr/actualites/acculturation-ia/)
-    """)
-    
-    # Bouton pour recommencer l'évaluation
-    st.markdown("<div class='button-container'>", unsafe_allow_html=True)
-    if st.button("🔄 Recommencer l'évaluation"):
-        reset_evaluation()
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
+        <br>
+        <p><b>{motivation_message}</b></p>
+        <hr>
+        <h3>🎓 Continuez votre parcours !</h3>
+        <p>Avec un score de **{pourcentage:.1f}%**, vous disposez déjà de nombreux prérequis pour intégrer l'IA dans votre quotidien. Nos formations avancées vous aideront à exploiter pleinement le potentiel de l'intelligence artificielle dans votre métier.</p>
+        <p>👉 <a href="https://insidegroup.fr/actualites/acculturation-ia/" style="color: #81c784;">Découvrez nos formations</a></p>
+        <hr>
+        <div class='button-container'>
+            <button style="
+                background-color: #f44336; 
+                color: white; 
+                padding: 10px 20px; 
+                text-align: center; 
+                text-decoration: none; 
+                display: inline-block; 
+                font-size: 16px; 
+                border: none; 
+                border-radius: 5px;
+                cursor: pointer;" onclick="window.location.reload();">
+                🔄 Recommencer l'évaluation
+            </button>
+        </div>
+    </div>
+    """
+
+    # Afficher le contenu HTML de la page des résultats
+    st.markdown(html_content, unsafe_allow_html=True)
 
 # Fonction pour afficher les questions
 def display_questions():
