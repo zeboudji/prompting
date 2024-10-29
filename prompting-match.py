@@ -93,6 +93,16 @@ st.markdown("""
     .card:hover {
         background-color: #2e7d32;
     }
+    /* Style pour le titre des cartes */
+    .card-title {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+    /* Style pour les descriptions des cartes */
+    .card-description {
+        font-size: 1em;
+        color: #cccccc;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -192,29 +202,58 @@ def reset_evaluation():
             st.session_state[key] = None
 
 def select_mode():
-    """Sélectionner le mode : Projet IA ou Formation IA"""
+    """Sélectionner le mode : Projet IA ou Formation IA avec des cartes interactives"""
     st.markdown("## 📋 Choisissez votre objectif")
     cols = st.columns(2)
     
     with cols[0]:
-        if st.button("🚀 Projet IA"):
+        st.markdown("""
+            <div class="card">
+                <div class="card-title">🚀 Projet IA</div>
+                <div class="card-description">Évaluez vos prérequis pour lancer un projet en Intelligence Artificielle.</div>
+            </div>
+            """, unsafe_allow_html=True)
+        if st.button("Sélectionner Projet IA"):
             st.session_state["mode"] = "Projet IA"
             st.session_state["question_number"] = 1
     
     with cols[1]:
-        if st.button("🎓 Formation IA"):
+        st.markdown("""
+            <div class="card">
+                <div class="card-title">🎓 Formation IA</div>
+                <div class="card-description">Évaluez votre compatibilité avec nos formations en Intelligence Artificielle.</div>
+            </div>
+            """, unsafe_allow_html=True)
+        if st.button("Sélectionner Formation IA"):
             st.session_state["mode"] = "Formation IA"
             st.session_state["question_number"] = 1
 
 def select_profile():
-    """Sélectionner le profil : Technique ou Non Technique"""
+    """Sélectionner le profil : Technique ou Non Technique avec des cartes interactives"""
     st.markdown("## 🎓 Sélectionnez votre profil")
-    profile = st.radio("Pour une Formation IA, veuillez indiquer votre profil :", 
-                       ("Sélectionnez une option", "Technique", "Non Technique"), 
-                       key="profile_selection")
-    if profile != "Sélectionnez une option":
-        st.session_state["profile"] = profile
-        st.session_state["question_number"] += 1
+    cols = st.columns(2)
+    
+    with cols[0]:
+        st.markdown("""
+            <div class="card">
+                <div class="card-title">💻 Technique</div>
+                <div class="card-description">Profil avec des compétences techniques et/ou en programmation.</div>
+            </div>
+            """, unsafe_allow_html=True)
+        if st.button("Sélectionner Technique"):
+            st.session_state["profile"] = "Technique"
+            st.session_state["question_number"] += 1
+    
+    with cols[1]:
+        st.markdown("""
+            <div class="card">
+                <div class="card-title">🧑‍💼 Non Technique</div>
+                <div class="card-description">Profil sans compétences techniques avancées en programmation.</div>
+            </div>
+            """, unsafe_allow_html=True)
+        if st.button("Sélectionner Non Technique"):
+            st.session_state["profile"] = "Non Technique"
+            st.session_state["question_number"] += 1
 
 def display_question(question, choices, question_num, total_questions, current_section):
     """Afficher une question avec ses choix et le fil d'Ariane"""
@@ -287,8 +326,7 @@ def display_results():
     elif mode == "Projet IA":
         current_section = "Projet IA"
     else:
-        st.error("Mode inconnu.")
-        return
+        current_section = None  # Pour éviter les erreurs
     
     # Calcul des scores pour le graphique radar
     competence_scores = {}
@@ -389,7 +427,7 @@ def display_results():
                 
                 👉 [Contactez-nous](https://insidegroup.fr/actualites/acculturation-ia/)
             """)
-
+    
     # Bouton pour recommencer l'évaluation
     st.markdown("<div class='button-container'>", unsafe_allow_html=True)
     if st.button("🔄 Recommencer l'évaluation"):
@@ -402,24 +440,53 @@ def display_initial_selection():
     cols = st.columns(2)
     
     with cols[0]:
-        if st.button("🚀 Projet IA"):
+        st.markdown("""
+            <div class="card">
+                <div class="card-title">🚀 Projet IA</div>
+                <div class="card-description">Évaluez vos prérequis pour lancer un projet en Intelligence Artificielle.</div>
+            </div>
+            """, unsafe_allow_html=True)
+        if st.button("Sélectionner Projet IA"):
             st.session_state["mode"] = "Projet IA"
             st.session_state["question_number"] = 1
     
     with cols[1]:
-        if st.button("🎓 Formation IA"):
+        st.markdown("""
+            <div class="card">
+                <div class="card-title">🎓 Formation IA</div>
+                <div class="card-description">Évaluez votre compatibilité avec nos formations en Intelligence Artificielle.</div>
+            </div>
+            """, unsafe_allow_html=True)
+        if st.button("Sélectionner Formation IA"):
             st.session_state["mode"] = "Formation IA"
             st.session_state["question_number"] = 1
 
 def display_profile_selection():
-    """Afficher la sélection du profil pour Formation IA"""
+    """Afficher la sélection du profil pour Formation IA avec des cartes interactives"""
     st.markdown("## 🎓 Sélectionnez votre profil")
-    profile = st.radio("Pour une Formation IA, veuillez indiquer votre profil :", 
-                       ("Sélectionnez une option", "Technique", "Non Technique"), 
-                       key="profile_selection")
-    if profile != "Sélectionnez une option":
-        st.session_state["profile"] = profile
-        st.session_state["question_number"] += 1
+    cols = st.columns(2)
+    
+    with cols[0]:
+        st.markdown("""
+            <div class="card">
+                <div class="card-title">💻 Technique</div>
+                <div class="card-description">Profil avec des compétences techniques et/ou en programmation.</div>
+            </div>
+            """, unsafe_allow_html=True)
+        if st.button("Sélectionner Technique"):
+            st.session_state["profile"] = "Technique"
+            st.session_state["question_number"] += 1
+    
+    with cols[1]:
+        st.markdown("""
+            <div class="card">
+                <div class="card-title">🧑‍💼 Non Technique</div>
+                <div class="card-description">Profil sans compétences techniques avancées en programmation.</div>
+            </div>
+            """, unsafe_allow_html=True)
+        if st.button("Sélectionner Non Technique"):
+            st.session_state["profile"] = "Non Technique"
+            st.session_state["question_number"] += 1
 
 def main():
     """Fonction principale pour gérer l'affichage"""
