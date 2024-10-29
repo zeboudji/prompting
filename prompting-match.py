@@ -108,7 +108,7 @@ def save_response():
     response_key = f"response_{current_question}"
     response = st.session_state.get(response_key, None)
     if response:  # Vérifier si une réponse est sélectionnée
-        st.session_state["responses"][f"Question {current_question}"] = response
+        st.session_state["responses"][f"Question {current_question + 1}"] = response
         st.session_state["question_number"] += 1
         # Vérification directe pour afficher les résultats si dernière question
         if st.session_state["question_number"] >= len(questions):
@@ -134,6 +134,7 @@ def reset_evaluation():
     st.experimental_rerun()
 
 # Fonction pour afficher les résultats
+
 def display_results():
     # Calcul des scores pour le graphique radar
     competence_scores = {}
