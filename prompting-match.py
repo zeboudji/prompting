@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 # Configuration de la page
 st.set_page_config(
     page_title="L'IA, est ce pour moi ? ",
+     page_title="Calculez votre score de compatibilité avec l'IA et découvrez si vous êtes déjà prêt, sans même le savoir !",
     page_icon="🚀",
     layout="centered",
     initial_sidebar_state="collapsed",
