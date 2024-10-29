@@ -164,8 +164,8 @@ def display_results():
         niveau_message = "Vous êtes éligible à la **Sensibilisation** pour mieux comprendre les fondamentaux de l'IA. Toutes les conditions sont réunies !"
         recommandation = "Nous vous recommandons de suivre notre formation de sensibilisation pour approfondir vos connaissances sur l'intelligence artificielle."
     else:
-        niveau = "🚀 Acculturation pour devenir un AS de l'IA"
-        niveau_message = "Félicitations ! Vous êtes éligible à l'**Acculturation** pour devenir un **AS de l'IA**. Toutes les conditions sont réunies !"
+        niveau = "🚀 Votre radar de compatibilité avec l'usage de l'IA "
+        niveau_message = "Félicitations ! Vous êtes éligible à l'Acculturation pour devenir un AS de l'IA. Toutes les conditions sont réunies !"
         recommandation = "Nous vous invitons à rejoindre notre programme d'acculturation avancée pour maîtriser pleinement les outils et concepts de l'intelligence artificielle."
 
     # Création du graphique radar avec Plotly
@@ -196,7 +196,7 @@ def display_results():
     )
 
     # Niveau d'acculturation
-    st.markdown(f"### 🔢 Votre score de compatibilité avec l'usage de l'IA est de : **{pourcentage:.1f}%**", unsafe_allow_html=True)
+    st.markdown(f"### Votre score de compatibilité avec l'usage de l'IA est de : **{pourcentage:.1f}%**", unsafe_allow_html=True)
     st.markdown(f"### **{niveau}**", unsafe_allow_html=True)
 
     # Afficher le graphique radar
