@@ -164,9 +164,9 @@ def display_results():
         niveau_message = "Vous êtes éligible à la **Sensibilisation** pour mieux comprendre les fondamentaux de l'IA. Toutes les conditions sont réunies !"
         recommandation = "Nous vous recommandons de suivre notre formation de sensibilisation pour approfondir vos connaissances sur l'intelligence artificielle."
     else:
-        niveau = "Vous avez besoin d'un acculturation pour exploiter pleinement le potentiel de l'IA 🚀"
-        niveau_message = "Félicitations ! Vous êtes éligible à l'**Acculturation** pour devenir un **AS de l'IA**. Toutes les conditions sont réunies !"
-        recommandation = "Nous vous invitons à rejoindre notre programme d'acculturation avancée pour maîtriser pleinement les outils et concepts de l'intelligence artificielle."
+        niveau = "Vous avez besoin d'une acculturation pour exploiter pleinement le potentiel de l'IA 🚀"
+        niveau_message = "Dans vos habitudes vous disposez déjà de tous les prérequis pour devenir un **AS de l'IA**. Toutes les conditions sont réunies !"
+        recommandation = "Nous vous invitons à consulter notre programme d'acculturation avancée pour maîtriser pleinement les outils et concepts de l'intelligence artificielle."
 
     # Création du graphique radar avec Plotly
     fig = go.Figure()
