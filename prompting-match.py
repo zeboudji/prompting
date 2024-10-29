@@ -196,7 +196,7 @@ def display_results():
     )
 
     # Niveau d'acculturation
-    st.markdown(f"### 🔢 Votre score de compatibilité avec l'usage de l'IA est de : **{pourcentage:.1f}%**", unsafe_allow_html=True)
+    st.markdown(f"### Votre score de compatibilité avec l'IA est de : **{pourcentage:.1f}%**", unsafe_allow_html=True)
     st.markdown(f"### **{niveau}**", unsafe_allow_html=True)
 
     # Afficher le graphique radar
