@@ -3,14 +3,14 @@ import pandas as pd
 import plotly.express as px
 import time
 
-# App Title with Emoji
+# Title with Emoji
 st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
 
-# State management for question progression
+# Initialize session state for question progression and responses
 if "question_number" not in st.session_state:
     st.session_state["question_number"] = 1
 
-# Define questions with a default "Select" option, emojis, and colorful prompts
+# Define questions with emojis, colors, and a default "Select" option
 questions = [
     ("🌱 **Quel est votre niveau de familiarité avec l’écriture de prompts pour l’IA ?**",
      ["Sélectionnez une réponse", "🔰 Débutant(e)", "📘 Intermédiaire", "🌟 Avancé(e)"]),
@@ -22,7 +22,7 @@ questions = [
      ["Sélectionnez une réponse", "✔️ Oui, j’utilise cette approche régulièrement", "🔄 J’ai quelques idées, mais je pourrais m’améliorer", "❌ Non, je ne suis pas sûr(e) de comment faire"])
 ]
 
-# Mapping responses to a numeric score for the radar chart
+# Mapping responses to a numeric score for radar chart
 responses_scores = {
     "🔰 Débutant(e)": 1, "📘 Intermédiaire": 2, "🌟 Avancé(e)": 3,
     "❓ Pas familier(e) avec ces termes": 1, "📙 Non, mais curieux(se) d’en apprendre plus": 2, "✅ Oui": 3,
@@ -30,19 +30,19 @@ responses_scores = {
     "❌ Non, je ne suis pas sûr(e) de comment faire": 1, "🔄 J’ai quelques idées, mais je pourrais m’améliorer": 2, "✔️ Oui, j’utilise cette approche régulièrement": 3
 }
 
-# Display current question with colorful background
+# Display current question with enhanced visibility and background color
 question_text, choices = questions[st.session_state["question_number"] - 1]
-st.markdown(f"<div style='padding: 20px; background-color: #f0f8ff; border-radius: 10px;'><b>{question_text}</b></div>", unsafe_allow_html=True)
+st.markdown(f"<div style='padding: 20px; background-color: #e3f2fd; border-radius: 10px; color: #0d47a1;'><b>{question_text}</b></div>", unsafe_allow_html=True)
 response = st.selectbox("Sélectionnez une réponse :", choices, key=f"question_{st.session_state['question_number']}")
 
-# Progress to next question automatically when a valid answer is chosen
+# Progress automatically when a valid response is selected, with a shorter delay for fluidity
 if response != "Sélectionnez une réponse":
     st.session_state[f"response_{st.session_state['question_number']}"] = response
-    st.markdown("<div style='color: #4caf50; font-size: 1.2em;'>⏳ Chargement...</div>", unsafe_allow_html=True)
-    time.sleep(1)  # Adding delay for animation effect
+    st.markdown("<div style='color: #4caf50; font-size: 1.2em;'>⏳ Transition en cours...</div>", unsafe_allow_html=True)
+    time.sleep(0.5)  # Shorter delay for smoother transition
     st.session_state["question_number"] += 1
 
-# Display results and radar chart once all questions are answered
+# Display results and radar chart after all questions
 if st.session_state["question_number"] > len(questions):
     # Calculate scores for radar chart
     competence_scores = {
