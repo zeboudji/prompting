@@ -137,7 +137,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # Titre principal
-st.markdown("# 🚀 Niveau d'acculturation à l'IA")
+st.markdown("# 🚀L'IA, est ce pour moi ?")
 
 # Initialisation de l'état de session avec setdefault pour éviter KeyError
 for key in ["responses", "question_number", "show_results"]:
