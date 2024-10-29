@@ -291,8 +291,6 @@ def display_results():
     # Création du contenu HTML complet pour la page des résultats
    
     
-    # Titre de félicitations
-    st.markdown("**Félicitations !**", unsafe_allow_html=True)
     
     # Niveau d'acculturation
     st.markdown(f"### 🔢 Votre Niveau d'Acculturation à l'IA: **{pourcentage:.1f}%**", unsafe_allow_html=True)
