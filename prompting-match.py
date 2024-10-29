@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 import plotly.graph_objects as go
 
 # Titre avec Emoji
@@ -13,8 +12,15 @@ if "step" not in st.session_state:
     st.session_state["show_results"] = False
 
 def next_question():
-    """ Fonction pour passer à la question suivante """
+    """Fonction pour passer à la question suivante"""
     st.session_state["question_number"] += 1
+
+def reset_evaluation():
+    """Fonction pour recommencer l'évaluation"""
+    st.session_state["step"] = "questions"
+    st.session_state["responses"] = {}
+    st.session_state["question_number"] = 1
+    st.session_state["show_results"] = False
 
 # Définition des questions avec emojis et options
 questions = [
@@ -47,26 +53,27 @@ if st.session_state["step"] == "questions":
     if st.session_state["question_number"] <= len(questions):
         question_text, choices = questions[st.session_state["question_number"] - 1]
         st.markdown(f"<div style='padding: 20px; background-color: #e3f2fd; border-radius: 10px; color: #0d47a1;'><b>{question_text}</b></div>", unsafe_allow_html=True)
-        response = st.selectbox("Sélectionnez une réponse :", choices, key=f"question_{st.session_state['question_number']}")
         
-        # Affichage du bouton pour passer à la question suivante
-        if response != "Sélectionnez une réponse":
-            if st.button("Suivant"):
+        with st.form(key=f"question_form_{st.session_state['question_number']}"):
+            response = st.selectbox("Sélectionnez une réponse :", choices, key=f"response_{st.session_state['question_number']}")
+            submitted = st.form_submit_button("Suivant")
+            if submitted and response != "Sélectionnez une réponse":
                 st.session_state["responses"][f"Question {st.session_state['question_number']}"] = response
                 next_question()
     else:
-        # Passage à l'étape de saisie du code d'accès
         st.session_state["step"] = "code"
 
 # Étape de saisie du code d'accès
 if st.session_state["step"] == "code":
     st.header("🔒 Accès aux Résultats")
-    code = st.text_input("Entrez le code d'accès pour voir vos résultats :", type="password")
-    if st.button("Valider"):
-        if code == "IA2024":
-            st.session_state["show_results"] = True
-        else:
-            st.error("Code d'accès invalide. Veuillez contacter Youssef Zeboudji.")
+    with st.form(key="code_form"):
+        code = st.text_input("Entrez le code d'accès pour voir vos résultats :", type="password")
+        submitted = st.form_submit_button("Valider")
+        if submitted:
+            if code == "IA2024":
+                st.session_state["show_results"] = True
+            else:
+                st.error("Code d'accès invalide. Veuillez contacter Youssef Zeboudji.")
     
     if st.session_state["show_results"]:
         # Calcul des scores pour le graphique radar
@@ -123,7 +130,4 @@ if st.session_state["step"] == "code":
         
         # Bouton pour recommencer l'évaluation
         if st.button("🔄 Recommencer l'évaluation"):
-            st.session_state["step"] = "questions"
-            st.session_state["responses"] = {}
-            st.session_state["question_number"] = 1
-            st.session_state["show_results"] = False
+            reset_evaluation()
