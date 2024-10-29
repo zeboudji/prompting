@@ -27,16 +27,17 @@ st.markdown("""
     }
     /* Style pour le conteneur des résultats */
     .result-container {
-        padding: 20px;
-        background-color: #2e7d32;
-        border-radius: 10px;
+        padding: 30px;
+        background-color: #1a237e;
+        border-radius: 15px;
         text-align: center;
         color: #ffffff;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.3);
     }
     /* Style pour les boutons */
     .button-container {
         text-align: center;
-        margin-top: 20px;
+        margin-top: 30px;
     }
     /* Style pour les textes d'erreur */
     .error-message {
@@ -103,6 +104,27 @@ st.markdown("""
     .card-description {
         font-size: 1em;
         color: #cccccc;
+    }
+    /* Style pour le graphique radar */
+    .radar-title {
+        text-align: center;
+        color: #ffffff;
+        margin-bottom: -30px;
+    }
+    /* Style pour le niveau */
+    .niveau {
+        font-size: 1.2em;
+        margin-top: 10px;
+    }
+    /* Style pour les recommandations */
+    .recommandation {
+        font-size: 1em;
+        margin-top: 20px;
+    }
+    /* Style pour les icônes */
+    .icon {
+        font-size: 3em;
+        margin-bottom: 10px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -225,9 +247,15 @@ def display_question(question_data, question_num):
 
 # Fonction pour afficher les résultats
 def display_results():
-    st.markdown("<div class='result-container'><h2>🌟 Félicitations ! 🌟</h2></div>", unsafe_allow_html=True)
-    st.balloons()
+    st.markdown("<div class='result-container'>", unsafe_allow_html=True)
     
+    # Icône de félicitations
+    st.markdown("<div class='icon'>🌟</div>", unsafe_allow_html=True)
+    
+    # Titre de félicitations
+    st.markdown("**Félicitations !**", unsafe_allow_html=True)
+    
+    # Niveau d'acculturation
     # Calcul des scores pour le graphique radar
     competence_scores = {}
     for idx, q in enumerate(questions, 1):
@@ -248,13 +276,18 @@ def display_results():
     if pourcentage < 60:
         niveau = "🎓 Sensibilisation à l'IA"
         niveau_message = "Vous êtes éligible à la **Sensibilisation** pour mieux comprendre les fondamentaux de l'IA. Toutes les conditions sont réunies !"
+        recommandation = "Nous vous recommandons de suivre notre formation de sensibilisation pour approfondir vos connaissances sur l'intelligence artificielle."
     else:
         niveau = "🚀 Acculturation pour devenir un AS de l'IA"
         niveau_message = "Félicitations ! Vous êtes éligible à l'**Acculturation** pour devenir un **AS de l'IA**. Toutes les conditions sont réunies !"
+        recommandation = "Nous vous invitons à rejoindre notre programme d'acculturation avancée pour maîtriser pleinement les outils et concepts de l'intelligence artificielle."
     
-    # Afficher le pourcentage et le niveau
-    st.markdown(f"### 🔢 Votre Niveau d'Acculturation à l'IA: **{pourcentage:.1f}%**")
-    st.markdown(f"### **{niveau}**")
+    # Afficher le niveau avec une mise en page agréable
+    st.markdown(f"### 🔢 Votre Niveau d'Acculturation à l'IA: **{pourcentage:.1f}%**", unsafe_allow_html=True)
+    st.markdown(f"### **{niveau}**", unsafe_allow_html=True)
+    
+    # Ajout d'un espace
+    st.markdown("<br>", unsafe_allow_html=True)
     
     # Création du graphique radar avec Plotly
     fig = go.Figure(data=go.Scatterpolar(
@@ -281,10 +314,20 @@ def display_results():
     
     st.plotly_chart(fig, use_container_width=True)
     
+    # Ajout d'un espace
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     # Message de niveau
     st.markdown(f"""
-        <div style='text-align: center; padding: 10px;'>
+        <div class='recommandation'>
             <b>{niveau_message}</b>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Recommandation supplémentaire
+    st.markdown(f"""
+        <div class='recommandation'>
+            {recommandation}
         </div>
     """, unsafe_allow_html=True)
     
@@ -302,6 +345,8 @@ def display_results():
     st.markdown("<div class='button-container'>", unsafe_allow_html=True)
     if st.button("🔄 Recommencer l'évaluation"):
         reset_evaluation()
+    st.markdown("</div>", unsafe_allow_html=True)
+    
     st.markdown("</div>", unsafe_allow_html=True)
 
 # Fonction pour réinitialiser l'évaluation
