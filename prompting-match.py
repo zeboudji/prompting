@@ -82,7 +82,7 @@ questions = [
     },
     {
         "theme": "Connaissance de l'Agilité",
-        "question": "⚡ Le concept d'agilité en gestion de projet vous est-il familier ?**",
+        "question": "⚡ Le concept d'agilité en gestion de projet vous est-il familier ?",
         "choices": ["Sélectionner une réponse","🔰 Pas du tout", "📚 Un peu", "🌟 Oui, je l'applique régulièrement"]
     },
     {
