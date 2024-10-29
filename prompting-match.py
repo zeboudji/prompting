@@ -208,11 +208,9 @@ def save_response(response, question_num):
     """Sauvegarder la réponse et passer à la question suivante"""
     st.session_state["responses"][f"Question {question_num}"] = response
     st.session_state["question_number"] += 1
-    # Si c'est la dernière question, afficher les résultats
+    # Vérification directe pour afficher les résultats si dernière question
     if st.session_state["question_number"] >= len(questions):
         st.session_state["show_results"] = True
-    # La mise à jour du session_state sera reflétée automatiquement lors du rerun
-    # Pas besoin d'utiliser st.experimental_rerun()
 
 # Fonction pour afficher une question avec fil d'Ariane
 def display_question(question_data, question_num):
@@ -261,13 +259,10 @@ def display_results():
     competence_scores = {}
     for idx, q in enumerate(questions, 1):
         response = st.session_state["responses"].get(f"Question {idx}", "Sélectionnez une réponse")
-        # Calculer le score basé sur l'index de la réponse
-        # Les choix sont ["Sélectionnez une réponse", "Option 1", "Option 2", "Option 3"]
-        # Donc l'index 1 correspond à score 1, index 2 à score 2, etc.
         try:
             score = q["choices"].index(response)
         except ValueError:
-            score = 0  # Si la réponse n'est pas trouvée
+            score = 0
         competence_scores[q["theme"]] = score
 
     categories = list(competence_scores.keys())
@@ -278,7 +273,7 @@ def display_results():
     categories += categories[:1]
 
     # Calcul du pourcentage de compatibilité
-    total_score = sum(values[:-1])  # Exclure la valeur ajoutée pour le radar
+    total_score = sum(values[:-1])
     max_score = (len(values) - 1) * 3
     pourcentage = (total_score / max_score) * 100 if max_score > 0 else 0
 
@@ -328,25 +323,18 @@ def display_results():
 
     # Message de niveau
     st.markdown(f"<div class='motivation-message'><b>{niveau_message}</b></div>", unsafe_allow_html=True)
-
-    # Recommandation supplémentaire
     st.markdown(f"<div class='motivation-message'>{recommandation}</div>", unsafe_allow_html=True)
 
     # Proposition de formation avec lien
     st.markdown("""
         ---
         🎓 **Continuez votre parcours !**
-        
-        Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Cela démontre une forte compatibilité avec nos formations avancées qui vous permettront de devenir un véritable **pro de l'IA**.
-        
         👉 [Découvrez nos formations](https://insidegroup.fr/actualites/acculturation-ia/)
-    """.format(pourcentage=pourcentage), unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
     # Bouton pour recommencer l'évaluation
-    st.markdown("<div class='button-container'>", unsafe_allow_html=True)
     if st.button("🔄 Recommencer l'évaluation"):
         reset_evaluation()
-    st.markdown("</div>", unsafe_allow_html=True)
 
 # Affichage des questions ou des résultats selon l'état
 if not st.session_state["show_results"]:
