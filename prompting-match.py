@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 
 # Configuration de la page
 st.set_page_config(
-    page_title="L'IA c'est pour moi ?",
+    page_title="L'IA, c'est pour moi ?",
     page_icon="🤖",
     layout="centered",
     initial_sidebar_state="auto",
@@ -157,7 +157,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # Titre principal
-st.markdown("# 🤖 L'IA c'est pour moi ?")
+st.markdown("# 🤖 L'IA, c'est pour moi ?")
 
 # Initialisation de l'état de session avec setdefault pour éviter KeyError
 for key in ["responses", "question_number", "show_results"]:
@@ -172,45 +172,57 @@ for key in ["responses", "question_number", "show_results"]:
 # Définition des questions avec thèmes, emojis et options adaptées
 questions = [
     {
-        "theme": "Compréhension des Concepts",
-        "question": "🗣️ **Dans votre métier, vous arrive-t-il d'exprimer des besoins spécifiques à votre équipe ou à votre supérieur ?**",
-        "choices": ["Sélectionnez une réponse", "🔰 Rarement", "📘 Parfois", "🌟 Fréquemment"]
-    },
-    {
         "theme": "Identification des Besoins",
         "question": "📋 **Est-ce que vous avez l'habitude de récolter les besoins de vos clients ou de vos collègues pour définir des projets ?**",
         "choices": ["Sélectionnez une réponse", "🔰 Jamais", "📘 Occasionnellement", "🌟 Régulièrement"]
     },
     {
-        "theme": "Connaissance de l'Agilité",
+        "theme": "Expression des Besoins",
+        "question": "🗣️ **Dans votre métier, vous arrive-t-il d'exprimer des besoins spécifiques à votre équipe ou à votre supérieur ?**",
+        "choices": ["Sélectionnez une réponse", "🔰 Rarement", "📘 Parfois", "🌟 Fréquemment"]
+    },
+    {
+        "theme": "Gestion de Projet",
         "question": "⚡ **Le concept d'agilité en gestion de projet vous est-il familier ?**",
         "choices": ["Sélectionnez une réponse", "🔰 Pas du tout", "📘 Un peu", "🌟 Oui, je l'applique régulièrement"]
     },
     {
-        "theme": "Utilisation des Outils IA",
-        "question": "🤖 **Utilisez-vous des outils d'intelligence artificielle (IA) pour améliorer votre efficacité au travail ?**",
+        "theme": "Utilisation Actuelle des Outils",
+        "question": "🛠️ **Utilisez-vous actuellement des outils numériques pour gérer vos tâches quotidiennes ?**",
         "choices": ["Sélectionnez une réponse", "🔰 Jamais", "📘 Parfois", "🌟 Fréquemment"]
     },
     {
-        "theme": "Rédaction de Prompts",
-        "question": "📝 **Avez-vous déjà rédigé des prompts pour interagir avec des outils d'IA comme ChatGPT ?**",
-        "choices": ["Sélectionnez une réponse", "🔰 Jamais", "📘 Rarement", "🌟 Souvent"]
+        "theme": "Ouverture à l'Adoption de Nouveaux Outils",
+        "question": "🤖 **Seriez-vous ouvert(e) à intégrer des outils d'intelligence artificielle pour améliorer votre efficacité au travail ?**",
+        "choices": ["Sélectionnez une réponse", "🔰 Pas du tout", "📘 Peut-être", "🌟 Absolument"]
     },
     {
-        "theme": "Structuration des Informations",
-        "question": "📈 **Comment évaluez-vous votre capacité à organiser les informations fournies par un outil d'IA dans vos rapports ou présentations ?**",
+        "theme": "Adaptabilité et Flexibilité",
+        "question": "📝 **Comment évaluez-vous votre capacité à apprendre et à vous adapter à de nouveaux outils technologiques ?**",
+        "choices": ["Sélectionnez une réponse", "🔰 Peu adaptable", "📘 Moyennement adaptable", "🌟 Très adaptable"]
+    },
+    {
+        "theme": "Structuration et Organisation",
+        "question": "📈 **Comment évaluez-vous votre capacité à organiser les informations fournies par un outil numérique dans vos rapports ou présentations ?**",
         "choices": ["Sélectionnez une réponse", "🔰 Peu structuré", "📘 Moyennement structuré", "🌟 Très structuré"]
+    },
+    {
+        "theme": "Collaboration et Communication",
+        "question": "💬 **Utilisez-vous des plateformes de collaboration (comme Slack, Teams, etc.) pour communiquer avec votre équipe ?**",
+        "choices": ["Sélectionnez une réponse", "🔰 Jamais", "📘 Parfois", "🌟 Fréquemment"]
     }
 ]
 
 # Mapping des réponses à un score numérique pour le graphique radar
 responses_scores = {
-    "🔰 Rarement": 1, "📘 Parfois": 2, "🌟 Fréquemment": 3,
     "🔰 Jamais": 1, "📘 Occasionnellement": 2, "🌟 Régulièrement": 3,
+    "🔰 Rarement": 1, "📘 Parfois": 2, "🌟 Fréquemment": 3,
     "🔰 Pas du tout": 1, "📘 Un peu": 2, "🌟 Oui, je l'applique régulièrement": 3,
     "🔰 Jamais": 1, "📘 Parfois": 2, "🌟 Fréquemment": 3,
-    "🔰 Jamais": 1, "📘 Rarement": 2, "🌟 Souvent": 3,
-    "🔰 Peu structuré": 1, "📘 Moyennement structuré": 2, "🌟 Très structuré": 3
+    "🔰 Pas du tout": 1, "📘 Peut-être": 2, "🌟 Absolument": 3,
+    "🔰 Peu adaptable": 1, "📘 Moyennement adaptable": 2, "🌟 Très adaptable": 3,
+    "🔰 Peu structuré": 1, "📘 Moyennement structuré": 2, "🌟 Très structuré": 3,
+    "🔰 Jamais": 1, "📘 Parfois": 2, "🌟 Fréquemment": 3
 }
 
 def save_response(response, question_num):
@@ -272,45 +284,45 @@ def display_results():
     categories = list(competence_scores.keys())
     values = list(competence_scores.values())
     
-    # Calcul du pourcentage de connaissances
+    # Calcul du pourcentage de compatibilité
     total_score = sum(values)
     max_score = len(values) * 3
     pourcentage = (total_score / max_score) * 100
     
     # Détermination du niveau basé sur le pourcentage avec messages motivants par tranche de 10%
     if pourcentage <= 10:
-        niveau = "🟠 Débutant en IA"
-        motivation_message = "Il est encore temps d'explorer les bases de l'intelligence artificielle. Continuez à apprendre !"
+        niveau = "🟠 Très Faible Compatibilité"
+        motivation_message = "Il est encore temps d'explorer comment l'intelligence artificielle peut être intégrée dans votre métier. Continuez à apprendre !"
     elif pourcentage <= 20:
-        niveau = "🟡 Sensibilisation Initiale"
-        motivation_message = "Vous avez une première approche de l'IA. Poursuivez vos efforts pour mieux comprendre ses applications."
+        niveau = "🟡 Faible Compatibilité"
+        motivation_message = "Vous commencez à comprendre les bénéfices de l'IA. Poursuivez vos efforts pour mieux intégrer l'IA dans vos activités."
     elif pourcentage <= 30:
-        niveau = "🟢 Sensibilisation Approfondie"
-        motivation_message = "Vous avez une bonne compréhension des concepts de base de l'IA. Continuez sur cette lancée !"
+        niveau = "🟢 Compatibilité Modérée"
+        motivation_message = "Vous avez une première approche de l'IA. Continuez sur cette lancée pour optimiser votre utilisation des outils d'IA."
     elif pourcentage <= 40:
-        niveau = "🔵 Compétent en IA"
-        motivation_message = "Vous maîtrisez les fondamentaux de l'IA. Il ne vous manque pas grand-chose pour une acculturation réussie !"
+        niveau = "🔵 Bonne Compatibilité"
+        motivation_message = "Vous maîtrisez les fondamentaux pour intégrer l'IA. Il ne vous manque pas grand-chose pour une acculturation réussie !"
     elif pourcentage <= 50:
-        niveau = "🟣 Avancé en IA"
-        motivation_message = "Vous possédez une solide compréhension de l'IA. Vous êtes presque prêt pour devenir un AS de l'IA !"
+        niveau = "🟣 Très Bonne Compatibilité"
+        motivation_message = "Vous possédez une solide compréhension de l'IA. Vous êtes presque prêt pour une intégration avancée de l'IA dans votre travail !"
     elif pourcentage <= 60:
-        niveau = "🟤 Très Avancé en IA"
-        motivation_message = "Vous avez toutes les compétences nécessaires pour une acculturation réussie. Prêt à devenir un AS de l'IA ?"
+        niveau = "🟤 Excellente Compatibilité"
+        motivation_message = "Vous avez toutes les compétences nécessaires pour une intégration réussie de l'IA. Prêt à devenir un AS de l'IA ?"
     elif pourcentage <= 70:
-        niveau = "🔴 Expert en IA"
+        niveau = "🔴 Maîtrise de l'IA"
         motivation_message = "Votre expertise en IA est impressionnante. Vous êtes un véritable AS de l'IA !"
     elif pourcentage <= 80:
         niveau = "🔵 Maître en IA"
-        motivation_message = "Vous maîtrisez parfaitement l'IA. Continuez à partager vos connaissances !"
+        motivation_message = "Vous maîtrisez parfaitement l'IA. Continuez à partager vos connaissances et à optimiser vos processus !"
     elif pourcentage <= 90:
         niveau = "🟢 Grand Maître en IA"
-        motivation_message = "Votre compréhension de l'IA est exceptionnelle. Vous êtes un leader dans ce domaine !"
+        motivation_message = "Votre compréhension de l'IA est exceptionnelle. Vous êtes un leader dans l'intégration de l'IA dans votre domaine !"
     else:
         niveau = "🌟 Légende de l'IA"
-        motivation_message = "Vous êtes une véritable légende de l'IA. Félicitations pour votre expertise inégalée !"
+        motivation_message = "Vous êtes une véritable légende de l'IA. Félicitations pour votre expertise inégalée et votre capacité à intégrer l'IA dans votre métier !"
     
     # Afficher le niveau avec une mise en page agréable
-    st.markdown(f"### 🔢 Votre Niveau d'Acculturation à l'IA: **{pourcentage:.1f}%**", unsafe_allow_html=True)
+    st.markdown(f"### 🔢 Votre Niveau de Compatibilité avec l'IA: **{pourcentage:.1f}%**", unsafe_allow_html=True)
     st.markdown(f"### **{niveau}**", unsafe_allow_html=True)
     
     # Ajout d'un espace
@@ -325,7 +337,7 @@ def display_results():
     ))
     
     fig.update_layout(
-        title="🌟 Votre Radar de Compétences en IA 🌟",
+        title="🌟 Votre Radar de Compatibilité avec l'IA 🌟",
         polar=dict(
             radialaxis=dict(
                 visible=True,
@@ -356,7 +368,7 @@ def display_results():
         ---
         🎓 **Continuez votre parcours !**
         
-        Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Cela démontre une forte compatibilité avec nos formations avancées qui vous permettront de devenir un véritable **pro de l'IA**.
+        Avec un score de **{pourcentage:.1f}%**, vous êtes bien positionné pour tirer parti de nos formations avancées qui vous aideront à intégrer l'IA de manière efficace dans votre métier.
         
         👉 [Découvrez nos formations](https://insidegroup.fr/actualites/acculturation-ia/)
     """)
@@ -418,138 +430,9 @@ def display_questions():
     else:
         st.session_state["show_results"] = True
 
-# Fonction pour afficher les résultats
-def display_results():
-    st.markdown("<div class='result-container'>", unsafe_allow_html=True)
-    
-    # Icône de félicitations
-    st.markdown("<div class='icon'>🌟</div>", unsafe_allow_html=True)
-    
-    # Titre de félicitations
-    st.markdown("**Félicitations !**", unsafe_allow_html=True)
-    
-    # Calcul des scores pour le graphique radar
-    competence_scores = {}
-    for idx, q in enumerate(questions, 1):
-        response = st.session_state["responses"].get(f"Question {idx}", "🔰 Rarement")
-        score = responses_scores.get(response, 1)
-        theme = q["theme"]
-        competence_scores[theme] = score
-    
-    categories = list(competence_scores.keys())
-    values = list(competence_scores.values())
-    
-    # Calcul du pourcentage de connaissances
-    total_score = sum(values)
-    max_score = len(values) * 3
-    pourcentage = (total_score / max_score) * 100
-    
-    # Détermination du niveau basé sur le pourcentage avec messages motivants par tranche de 10%
-    if pourcentage <= 10:
-        niveau = "🟠 Débutant en IA"
-        motivation_message = "Il est encore temps d'explorer les bases de l'intelligence artificielle. Continuez à apprendre !"
-    elif pourcentage <= 20:
-        niveau = "🟡 Sensibilisation Initiale"
-        motivation_message = "Vous avez une première approche de l'IA. Poursuivez vos efforts pour mieux comprendre ses applications."
-    elif pourcentage <= 30:
-        niveau = "🟢 Sensibilisation Approfondie"
-        motivation_message = "Vous avez une bonne compréhension des concepts de base de l'IA. Continuez sur cette lancée !"
-    elif pourcentage <= 40:
-        niveau = "🔵 Compétent en IA"
-        motivation_message = "Vous maîtrisez les fondamentaux de l'IA. Il ne vous manque pas grand-chose pour une acculturation réussie !"
-    elif pourcentage <= 50:
-        niveau = "🟣 Avancé en IA"
-        motivation_message = "Vous possédez une solide compréhension de l'IA. Vous êtes presque prêt pour devenir un AS de l'IA !"
-    elif pourcentage <= 60:
-        niveau = "🟤 Très Avancé en IA"
-        motivation_message = "Vous avez toutes les compétences nécessaires pour une acculturation réussie. Prêt à devenir un AS de l'IA ?"
-    elif pourcentage <= 70:
-        niveau = "🔴 Expert en IA"
-        motivation_message = "Votre expertise en IA est impressionnante. Vous êtes un véritable AS de l'IA !"
-    elif pourcentage <= 80:
-        niveau = "🔵 Maître en IA"
-        motivation_message = "Vous maîtrisez parfaitement l'IA. Continuez à partager vos connaissances !"
-    elif pourcentage <= 90:
-        niveau = "🟢 Grand Maître en IA"
-        motivation_message = "Votre compréhension de l'IA est exceptionnelle. Vous êtes un leader dans ce domaine !"
-    else:
-        niveau = "🌟 Légende de l'IA"
-        motivation_message = "Vous êtes une véritable légende de l'IA. Félicitations pour votre expertise inégalée !"
-    
-    # Afficher le niveau avec une mise en page agréable
-    st.markdown(f"### 🔢 Votre Niveau d'Acculturation à l'IA: **{pourcentage:.1f}%**", unsafe_allow_html=True)
-    st.markdown(f"### **{niveau}**", unsafe_allow_html=True)
-    
-    # Ajout d'un espace
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Création du graphique radar avec Plotly
-    fig = go.Figure(data=go.Scatterpolar(
-        r=values,
-        theta=categories,
-        fill='toself',
-        marker=dict(color='rgba(56, 128, 255, 0.6)')
-    ))
-    
-    fig.update_layout(
-        title="🌟 Votre Radar de Compétences en IA 🌟",
-        polar=dict(
-            radialaxis=dict(
-                visible=True,
-                range=[0, 3],
-                tickvals=[0, 1, 2, 3],
-                ticktext=["0", "1", "2", "3"]
-            ),
-            angularaxis=dict(showline=True, linecolor="lightgrey")
-        ),
-        showlegend=False,
-        template="plotly_dark"
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
-    
-    # Ajout d'un espace
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Message de motivation
-    st.markdown(f"""
-        <div class='motivation-message'>
-            <b>{motivation_message}</b>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # Proposition de formation avec lien
-    st.markdown(f"""
-        ---
-        🎓 **Continuez votre parcours !**
-        
-        Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Cela démontre une forte compatibilité avec nos formations avancées qui vous permettront de devenir un véritable **pro de l'IA**.
-        
-        👉 [Découvrez nos formations](https://insidegroup.fr/actualites/acculturation-ia/)
-    """)
-    
-    # Bouton pour recommencer l'évaluation
-    st.markdown("<div class='button-container'>", unsafe_allow_html=True)
-    if st.button("🔄 Recommencer l'évaluation"):
-        reset_evaluation()
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# Fonction pour réinitialiser l'évaluation
-def reset_evaluation():
-    st.session_state["responses"] = {}
-    st.session_state["question_number"] = 0
-    st.session_state["show_results"] = False
-
 # Affichage des questions ou des résultats selon l'état
 if not st.session_state["show_results"]:
-    if st.session_state["question_number"] < len(questions):
-        current_question_num = st.session_state["question_number"] + 1
-        current_q = questions[st.session_state["question_number"]]
-        display_question(current_q, current_question_num)
-    else:
-        st.session_state["show_results"] = True
+    display_questions()
 
 if st.session_state["show_results"]:
     display_results()
