@@ -1,100 +1,34 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-import sqlite3
-from datetime import datetime
 
 # Titre avec Emoji
 st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
 
-# Connexion à la base de données et création des tables si nécessaire
-def create_connection():
-    conn = sqlite3.connect("user_data.db")
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS profiles (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT,
-            nom TEXT,
-            email TEXT,
-            poste TEXT,
-            secteur TEXT,
-            niveau_maturité TEXT,
-            connaissance_agile TEXT
-        )
-    ''')
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS responses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            date TEXT,
-            question TEXT,
-            response TEXT,
-            FOREIGN KEY(user_id) REFERENCES profiles(id)
-        )
-    ''')
-    conn.commit()
-    return conn
-
-# Fonction pour sauvegarder le profil utilisateur
-def save_profile(nom, email, poste, secteur, niveau_maturité, connaissance_agile):
-    conn = create_connection()
-    cursor = conn.cursor()
-    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cursor.execute('''
-        INSERT INTO profiles (date, nom, email, poste, secteur, niveau_maturité, connaissance_agile)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (date, nom, email, poste, secteur, niveau_maturité, connaissance_agile))
-    conn.commit()
-    user_id = cursor.lastrowid
-    conn.close()
-    return user_id
-
-# Fonction pour sauvegarder les réponses
-def save_responses(user_id, responses):
-    conn = create_connection()
-    cursor = conn.cursor()
-    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    for question, response in responses.items():
-        cursor.execute('''
-            INSERT INTO responses (user_id, date, question, response)
-            VALUES (?, ?, ?, ?)
-        ''', (user_id, date, question, response))
-    conn.commit()
-    conn.close()
+# Liste des codes d'accès valides
+VALID_CODES = ["CODE123", "ACCESS456", "PROMPT789"]  # Remplace par tes propres codes
 
 # Initialisation de l'état de session
-if "step" not in st.session_state:
-    st.session_state["step"] = "profil"
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
 
-# Formulaire de profil utilisateur
-if st.session_state["step"] == "profil":
-    st.header("🔍 Informations sur votre profil")
-    with st.form("profil_form"):
-        nom = st.text_input("Nom complet")
-        email = st.text_input("Email")
-        poste = st.text_input("Votre poste actuel")
-        secteur = st.text_input("Secteur d'activité")
-        niveau_maturité = st.selectbox(
-            "Niveau de maturité en IA",
-            ["Sélectionnez une option", "Débutant", "Intermédiaire", "Avancé"]
-        )
-        connaissance_agile = st.selectbox(
-            "Connaissance des méthodes Agiles",
-            ["Sélectionnez une option", "Oui", "Non"]
-        )
-        submitted = st.form_submit_button("Commencer l'évaluation")
+# Fonction pour authentifier l'utilisateur
+def authenticate(code):
+    if code in VALID_CODES:
+        st.session_state["authenticated"] = True
+    else:
+        st.error("Code d'accès invalide. Veuillez réessayer.")
+
+# Étape d'authentification
+if not st.session_state["authenticated"]:
+    st.header("🔒 Accès Restreint")
+    with st.form("auth_form"):
+        access_code = st.text_input("Entrez votre code d'accès :", type="password")
+        submitted = st.form_submit_button("Accéder à l'évaluation")
     
     if submitted:
-        if nom and email and poste and secteur and niveau_maturité != "Sélectionnez une option" and connaissance_agile != "Sélectionnez une option":
-            user_id = save_profile(nom, email, poste, secteur, niveau_maturité, connaissance_agile)
-            st.session_state["user_id"] = user_id
-            st.session_state["step"] = "questions"
-        else:
-            st.error("Veuillez remplir tous les champs requis.")
-
-# Questions d'évaluation
-elif st.session_state["step"] == "questions":
+        authenticate(access_code)
+else:
     # Initialisation de la progression des questions
     if "question_number" not in st.session_state:
         st.session_state["question_number"] = 1
@@ -120,8 +54,15 @@ elif st.session_state["step"] == "questions":
          ["Sélectionnez une réponse", "📊 Très structuré", "📈 Parfois structuré", "🚧 Peu structuré"])
     ]
     
-    # Récupération du profil utilisateur
-    user_id = st.session_state["user_id"]
+    # Mapping des réponses à un score numérique pour le graphique radar
+    responses_scores = {
+        "🔰 Débutant(e)": 1, "📘 Intermédiaire": 2, "🌟 Avancé(e)": 3,
+        "❓ Pas familier(e) avec ces termes": 1, "📙 Non, mais curieux(se) d’en apprendre plus": 2, "✅ Oui": 3,
+        "⚠️ Besoin d’amélioration": 1, "📄 Clair, mais manque parfois de détails": 2, "📝 Très clair et structuré": 3,
+        "❌ Non, je ne suis pas sûr(e) de comment faire": 1, "🔄 J’ai quelques idées, mais je pourrais m’améliorer": 2, "✔️ Oui, j’utilise cette approche régulièrement": 3,
+        "🛑 Peu adaptable": 1, "😊 Souvent adaptable": 2, "🗣 Très adaptable": 3,
+        "🚧 Peu structuré": 1, "📈 Parfois structuré": 2, "📊 Très structuré": 3
+    }
     
     # Affichage de la question courante
     if st.session_state["question_number"] <= len(questions):
@@ -135,19 +76,7 @@ elif st.session_state["step"] == "questions":
                 st.session_state["responses"][f"Question {st.session_state['question_number']}"] = response
                 next_question()
     else:
-        # Sauvegarde des réponses dans la base de données
-        save_responses(user_id, st.session_state["responses"])
-        
         # Calcul des scores pour le graphique radar
-        responses_scores = {
-            "🔰 Débutant(e)": 1, "📘 Intermédiaire": 2, "🌟 Avancé(e)": 3,
-            "❓ Pas familier(e) avec ces termes": 1, "📙 Non, mais curieux(se) d’en apprendre plus": 2, "✅ Oui": 3,
-            "⚠️ Besoin d’amélioration": 1, "📄 Clair, mais manque parfois de détails": 2, "📝 Très clair et structuré": 3,
-            "❌ Non, je ne suis pas sûr(e) de comment faire": 1, "🔄 J’ai quelques idées, mais je pourrais m’améliorer": 2, "✔️ Oui, j’utilise cette approche régulièrement": 3,
-            "🛑 Peu adaptable": 1, "😊 Souvent adaptable": 2, "🗣 Très adaptable": 3,
-            "🚧 Peu structuré": 1, "📈 Parfois structuré": 2, "📊 Très structuré": 3
-        }
-        
         competence_scores = {
             "Familiarité": responses_scores.get(st.session_state["responses"].get("Question 1", "🔰 Débutant(e)"), 1),
             "Expérience Agile": responses_scores.get(st.session_state["responses"].get("Question 2", "❓ Pas familier(e) avec ces termes"), 1),
@@ -201,6 +130,5 @@ elif st.session_state["step"] == "questions":
         
         # Bouton pour recommencer l'évaluation
         if st.button("🔄 Recommencer l'évaluation"):
-            st.session_state["step"] = "profil"
             st.session_state["question_number"] = 1
             st.session_state["responses"] = {}
