@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 
 # Configuration de la page
 st.set_page_config(
-    page_title="Évaluation des Compétences en IA",
+    page_title="Niveau d'acculturation à l'IA",
     page_icon="🚀",
     layout="centered",
     initial_sidebar_state="auto",
@@ -79,6 +79,30 @@ st.markdown("""
         font-weight: bold;
         color: #4CAF50;
     }
+    /* Style pour les cartes */
+    .card {
+        background-color: #1e1e1e;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        color: #ffffff;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        transition: 0.3s;
+        cursor: pointer;
+    }
+    .card:hover {
+        background-color: #2e7d32;
+    }
+    /* Style pour le titre des cartes */
+    .card-title {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+    /* Style pour les descriptions des cartes */
+    .card-description {
+        font-size: 1em;
+        color: #cccccc;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -104,85 +128,155 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # Titre principal
-st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
+st.markdown("# 🚀 Niveau d'acculturation à l'IA")
 
-# Initialisation de l'état de session
-if "responses" not in st.session_state:
-    st.session_state["responses"] = {}
-    st.session_state["question_number"] = 0
-    st.session_state["show_results"] = False
+# Initialisation de l'état de session avec setdefault pour éviter KeyError
+for key in ["responses", "question_number", "show_results", "mode", "profile"]:
+    if key not in st.session_state:
+        if key == "responses":
+            st.session_state[key] = {}
+        elif key == "question_number":
+            st.session_state[key] = 0
+        elif key == "show_results":
+            st.session_state[key] = False
+        else:
+            st.session_state[key] = None
 
 # Définition des questions avec emojis et options adaptées au métier
 questions = [
-    ("🔧 **Est-ce que dans votre métier, vous utilisez régulièrement des outils d'IA pour automatiser des tâches ?**",
+    ("🔍 **Les notions de prompt et de GPT vous parlent-elles ?**",
      ["Sélectionnez une réponse", "🔰 Débutant(e)", "📘 Intermédiaire", "🌟 Avancé(e)"]),
-    ("📊 **Est-ce que vous intégrez des analyses de données avancées dans vos projets actuels ?**",
-     ["Sélectionnez une réponse", "✅ Oui", "📙 Non, mais curieux(se) d’en apprendre plus", "❓ Pas familier(e) avec ces concepts"]),
-    ("📝 **Comment évalueriez-vous votre capacité à rédiger des prompts clairs et précis pour l'IA dans votre travail quotidien ?**",
-     ["Sélectionnez une réponse", "📝 Très clair et structuré", "📄 Clair, mais manque parfois de détails", "⚠️ Besoin d’amélioration"]),
+    ("🤖 **Connaissez-vous les concepts de RAG (Retrieval-Augmented Generation) ?**",
+     ["Sélectionnez une réponse", "❓ Pas familier(e)", "🧠 Je connais les bases", "🚀 Je suis expérimenté(e)"]),
+    ("📈 **Utilisez-vous des outils d'IA dans vos tâches quotidiennes ?**",
+     ["Sélectionnez une réponse", "✅ Oui, régulièrement", "📉 Parfois", "❌ Jamais"]),
+    ("🧠 **Quel est votre niveau de compréhension du machine learning ?**",
+     ["Sélectionnez une réponse", "📚 Compréhension de base", "🔍 Compréhension intermédiaire", "🚀 Expertise avancée"]),
+    ("🛠️ **Avez-vous déjà intégré des modèles d'IA dans vos projets professionnels ?**",
+     ["Sélectionnez une réponse", "✅ Oui, plusieurs fois", "🟡 Une ou deux fois", "🔴 Non, jamais"]),
+    ("📝 **Comment évalueriez-vous votre capacité à rédiger des prompts efficaces pour l'IA ?**",
+     ["Sélectionnez une réponse", "📝 Très efficace", "📄 Moyennement efficace", "⚠️ Peu efficace"]),
     ("🔄 **Dans quelle mesure savez-vous diviser un projet complexe en étapes plus petites pour faciliter l'interaction avec l'IA ?**",
      ["Sélectionnez une réponse", "✔️ Oui, j’utilise cette approche régulièrement", "🔄 J’ai quelques idées, mais je pourrais m’améliorer", "❌ Non, je ne suis pas sûr(e) de comment faire"]),
-    ("🗣 **Comment évalueriez-vous votre capacité à adapter le ton et le style des prompts en fonction du contexte de votre projet ?**",
-     ["Sélectionnez une réponse", "🗣 Très adaptable", "😊 Souvent adaptable", "🛑 Peu adaptable"]),
-    ("📈 **Comment évalueriez-vous votre capacité à structurer les réponses de l'IA pour obtenir des informations claires et organisées dans vos rapports ou présentations ?**",
-     ["Sélectionnez une réponse", "📊 Très structuré", "📈 Parfois structuré", "🚧 Peu structuré"])
+    ("🗣️ **Comment évalueriez-vous votre capacité à adapter le ton et le style des prompts en fonction du contexte de votre projet ?**",
+     ["Sélectionnez une réponse", "🗣️ Très adaptable", "😊 Souvent adaptable", "🛑 Peu adaptable"]),
+    ("📊 **Comment évalueriez-vous votre capacité à structurer les réponses de l'IA pour obtenir des informations claires et organisées dans vos rapports ou présentations ?**",
+     ["Sélectionnez une réponse", "📊 Très structuré", "📈 Parfois structuré", "🚧 Peu structuré"]),
 ]
 
 # Mapping des réponses à un score numérique pour le graphique radar
 responses_scores = {
     "🔰 Débutant(e)": 1, "📘 Intermédiaire": 2, "🌟 Avancé(e)": 3,
-    "❓ Pas familier(e) avec ces concepts": 1, "📙 Non, mais curieux(se) d’en apprendre plus": 2, "✅ Oui": 3,
-    "⚠️ Besoin d’amélioration": 1, "📄 Clair, mais manque parfois de détails": 2, "📝 Très clair et structuré": 3,
-    "❌ Non, je ne suis pas sûr(e) de comment faire": 1, "🔄 J’ai quelques idées, mais je pourrais m’améliorer": 2, "✔️ Oui, j’utilise cette approche régulièrement": 3,
-    "🛑 Peu adaptable": 1, "😊 Souvent adaptable": 2, "🗣 Très adaptable": 3,
-    "🚧 Peu structuré": 1, "📈 Parfois structuré": 2, "📊 Très structuré": 3
+    "❓ Pas familier(e)": 1, "🧠 Je connais les bases": 2, "🚀 Je suis expérimenté(e)": 3,
+    "✅ Oui, régulièrement": 3, "📉 Parfois": 2, "❌ Jamais": 1,
+    "📚 Compréhension de base": 1, "🔍 Compréhension intermédiaire": 2, "🚀 Expertise avancée": 3,
+    "✅ Oui, plusieurs fois": 3, "🟡 Une ou deux fois": 2, "🔴 Non, jamais": 1,
+    "📝 Très efficace": 3, "📄 Moyennement efficace": 2, "⚠️ Peu efficace": 1,
+    "✔️ Oui, j’utilise cette approche régulièrement": 3, "🔄 J’ai quelques idées, mais je pourrais m’améliorer": 2, "❌ Non, je ne suis pas sûr(e) de comment faire": 1,
+    "🗣️ Très adaptable": 3, "😊 Souvent adaptable": 2, "🛑 Peu adaptable": 1,
+    "📊 Très structuré": 3, "📈 Parfois structuré": 2, "🚧 Peu structuré": 1
 }
 
-def save_response(response, question_num):
-    """Sauvegarder la réponse et passer à la question suivante"""
-    st.session_state["responses"][f"Question {question_num}"] = response
-    st.session_state["question_number"] += 1
+def reset_evaluation():
+    """Réinitialiser l'évaluation"""
+    for key in ["responses", "question_number", "show_results", "mode", "profile"]:
+        if key == "responses":
+            st.session_state[key] = {}
+        elif key == "question_number":
+            st.session_state[key] = 0
+        elif key == "show_results":
+            st.session_state[key] = False
+        else:
+            st.session_state[key] = None
 
-# Fonction pour afficher une question avec fil d'Ariane
+def display_initial_selection():
+    """Afficher la sélection initiale avec deux cartes"""
+    st.markdown("## 📋 Choisissez votre objectif")
+    cols = st.columns(2)
+    
+    with cols[0]:
+        st.markdown("""
+            <div class="card">
+                <div class="card-title">🚀 Projet IA</div>
+                <div class="card-description">Évaluez vos prérequis pour lancer un projet en Intelligence Artificielle.</div>
+            </div>
+            """, unsafe_allow_html=True)
+        if st.button("Sélectionner Projet IA"):
+            st.session_state["mode"] = "Projet IA"
+            st.session_state["question_number"] = 1
+    
+    with cols[1]:
+        st.markdown("""
+            <div class="card">
+                <div class="card-title">🎓 Formation IA</div>
+                <div class="card-description">Évaluez votre compatibilité avec nos formations en Intelligence Artificielle.</div>
+            </div>
+            """, unsafe_allow_html=True)
+        if st.button("Sélectionner Formation IA"):
+            st.session_state["mode"] = "Formation IA"
+            st.session_state["question_number"] = 1
+
 def display_question(question_text, choices, question_num):
-    # Création du fil d'Ariane
+    """Afficher une question avec ses choix et le fil d'Ariane"""
+    # Récupérer le thème de la question courante
+    # Supposons que le thème est le premier mot de la question (par exemple, "🔍 Familiarité")
+    theme = question_text.split('**')[1].split(' ')[0]
+    
+    # Création du fil d'Ariane avec thèmes
     breadcrumb = '<ul class="breadcrumb">'
     for i in range(1, len(questions)+1):
         if i < question_num:
-            breadcrumb += f'<li><span class="active">Étape {i}</span></li>'
+            # Extraire le thème de la question précédente
+            prev_theme = questions[i-1][0].split('**')[1].split(' ')[0]
+            breadcrumb += f'<li><span class="active">{prev_theme}</span></li>'
         elif i == question_num:
-            breadcrumb += f'<li><span class="active">Étape {i}</span></li>'
+            # Extraire le thème de la question courante
+            breadcrumb += f'<li><span class="active">{theme}</span></li>'
         else:
-            breadcrumb += f'<li>Étape {i}</li>'
+            # Extraire le thème des questions futures
+            future_theme = questions[i-1][0].split('**')[1].split(' ')[0]
+            breadcrumb += f'<li>{future_theme}</li>'
     breadcrumb += '</ul>'
     st.markdown(breadcrumb, unsafe_allow_html=True)
     
+    # Affichage de la question
     st.markdown(f"<div class='question-container'><b>{question_text}</b></div>", unsafe_allow_html=True)
     
     def on_change():
         selected = st.session_state[f"response_{question_num}"]
         if selected != "Sélectionnez une réponse":
-            save_response(selected, question_num)
+            st.session_state["responses"][f"Question {question_num}"] = selected
+            st.session_state["question_number"] += 1
     
     selected = st.radio("Sélectionnez une réponse :", choices, key=f"response_{question_num}", on_change=on_change)
     
     if selected == "Sélectionnez une réponse":
         st.markdown("<span class='error-message'>Veuillez sélectionner une réponse valide.</span>", unsafe_allow_html=True)
 
-# Fonction pour afficher les résultats
+def display_questions():
+    """Afficher les questions en fonction du mode et du profil"""
+    current_question_num = st.session_state["question_number"]
+    
+    if 1 <= current_question_num <= len(questions):
+        current_q = questions[current_question_num - 1]
+        question_text, choices = current_q
+        display_question(question_text, choices, current_question_num)
+    else:
+        st.session_state["show_results"] = True
+
 def display_results():
+    """Afficher les résultats après l'évaluation"""
     st.markdown("<div class='result-container'><h2>🌟 Félicitations ! 🌟</h2></div>", unsafe_allow_html=True)
     st.balloons()
     
     # Calcul des scores pour le graphique radar
-    competence_scores = {
-        "Familiarité": responses_scores.get(st.session_state["responses"].get("Question 1", "🔰 Débutant(e)"), 1),
-        "Expérience Agile": responses_scores.get(st.session_state["responses"].get("Question 2", "❓ Pas familier(e) avec ces concepts"), 1),
-        "Clarté": responses_scores.get(st.session_state["responses"].get("Question 3", "⚠️ Besoin d’amélioration"), 1),
-        "Diviser une Tâche": responses_scores.get(st.session_state["responses"].get("Question 4", "❌ Non, je ne suis pas sûr(e) de comment faire"), 1),
-        "Adaptabilité du Ton": responses_scores.get(st.session_state["responses"].get("Question 5", "🛑 Peu adaptable"), 1),
-        "Structure des Réponses": responses_scores.get(st.session_state["responses"].get("Question 6", "🚧 Peu structuré"), 1)
-    }
+    competence_scores = {}
+    for idx, q in enumerate(questions, 1):
+        response = st.session_state["responses"].get(f"Question {idx}", "🔰 Débutant(e)")
+        score = responses_scores.get(response, 1)
+        # Extraire le thème de la question
+        theme = q[0].split('**')[1].split(' ')[0]
+        competence_scores[theme] = score
     
     categories = list(competence_scores.keys())
     values = list(competence_scores.values())
@@ -201,7 +295,7 @@ def display_results():
         niveau_message = "Félicitations ! Vous êtes éligible à l'**Acculturation** pour devenir un **AS de l'IA**. Toutes les conditions sont réunies !"
     
     # Afficher le pourcentage et le niveau
-    st.markdown(f"### 🔢 Votre Niveau de Connaissance en IA: **{pourcentage:.1f}%**")
+    st.markdown(f"### 🔢 Votre Niveau d'Acculturation à l'IA: **{pourcentage:.1f}%**")
     st.markdown(f"### **{niveau}**")
     
     # Création du graphique radar avec Plotly
@@ -213,7 +307,7 @@ def display_results():
     ))
     
     fig.update_layout(
-        title="🌟 Votre Radar de Compétences en Prompting IA 🌟",
+        title="🌟 Votre Radar de Compétences en IA 🌟",
         polar=dict(
             radialaxis=dict(
                 visible=True,
@@ -252,21 +346,15 @@ def display_results():
         reset_evaluation()
     st.markdown("</div>", unsafe_allow_html=True)
 
-# Fonction pour réinitialiser l'évaluation
-def reset_evaluation():
-    st.session_state["responses"] = {}
-    st.session_state["question_number"] = 0
-    st.session_state["show_results"] = False
-
 # Affichage des questions ou des résultats selon l'état
-if not st.session_state["show_results"]:
-    if st.session_state["question_number"] < len(questions):
-        current_question_num = st.session_state["question_number"] + 1
-        current_q = questions[st.session_state["question_number"]]
-        question_text, choices = current_q
-        display_question(question_text, choices, current_question_num)
+def main():
+    """Fonction principale pour gérer l'affichage"""
+    if not st.session_state["mode"]:
+        display_initial_selection()
+    elif not st.session_state["show_results"]:
+        display_questions()
     else:
-        st.session_state["show_results"] = True
+        display_results()
 
-if st.session_state["show_results"]:
-    display_results()
+if __name__ == "__main__":
+    main()
