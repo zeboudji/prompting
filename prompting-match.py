@@ -109,6 +109,7 @@ def save_response(response, question_num):
     # Vérification directe pour afficher les résultats si dernière question
     if st.session_state["question_number"] >= len(questions):
         st.session_state["show_results"] = True
+    st.experimental_rerun()
 
 # Fonction pour afficher une question sous forme d'accordéon
 def display_question_accordion():
@@ -117,9 +118,7 @@ def display_question_accordion():
             with st.expander(f"{question_data['theme']}", expanded=True):  # Créer un accordéon pour la question courante
                 question_text = question_data["question"]
                 choices = question_data["choices"]
-                selected = st.radio(question_text, choices, key=f"response_{idx}")
-                if selected:
-                    save_response(selected, idx)
+                selected = st.radio(question_text, choices, key=f"response_{idx}", on_change=save_response, args=(st.session_state[f"response_{idx}"], idx))
         else:
             with st.expander(f"{question_data['theme']}", expanded=False):
                 st.markdown(f"**{question_data['question']}**")
@@ -200,6 +199,7 @@ def display_results():
     st.plotly_chart(fig, use_container_width=True)
 
     # Message de niveau
+    st.markdown(f"<div class='motivation-message'><b>{niveau_message}</b></div>", unsafe_allow_html=True)
     st.markdown(f"<div class='motivation-message'><b>{niveau_message}</b></div>", unsafe_allow_html=True)
     st.markdown(f"<div class='motivation-message'>{recommandation}</div>", unsafe_allow_html=True)
 
