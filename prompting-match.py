@@ -205,7 +205,7 @@ questions = [
 ]
 
 def save_response(response, question_num):
-   " ""Sauvegarder la réponse et passer à la question suivante"""
+   """Sauvegarder la réponse et passer à la question suivante"""
     st.session_state["responses"][f"Question {question_num}"] = response
     st.session_state["question_number"] += 1
     # Vérification directe pour afficher les résultats si dernière question
