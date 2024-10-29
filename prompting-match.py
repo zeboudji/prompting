@@ -73,7 +73,7 @@ questions = [
     {
         "theme": "Compréhension des Concepts",
         "question": "🗣️ **Dans votre métier, vous arrive-t-il d'exprimer des besoins spécifiques à votre équipe ou à votre supérieur ?**",
-        "choices": ["🔰 Rarement", "📚 Parfois", "🌟 Fréquemment"]
+        "choices": ["Sélectionner une réponse","🔰 Rarement", "📚 Parfois", "🌟 Fréquemment"]
     },
     {
         "theme": "Identification des Besoins",
