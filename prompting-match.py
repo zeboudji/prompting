@@ -9,7 +9,6 @@ if "step" not in st.session_state:
     st.session_state["step"] = "questions"
     st.session_state["responses"] = {}
     st.session_state["question_number"] = 1
-    st.session_state["show_results"] = False
 
 def next_question():
     """Fonction pour passer à la question suivante"""
@@ -20,7 +19,6 @@ def reset_evaluation():
     st.session_state["step"] = "questions"
     st.session_state["responses"] = {}
     st.session_state["question_number"] = 1
-    st.session_state["show_results"] = False
 
 # Définition des questions avec emojis et options
 questions = [
@@ -61,73 +59,62 @@ if st.session_state["step"] == "questions":
                 st.session_state["responses"][f"Question {st.session_state['question_number']}"] = response
                 next_question()
     else:
-        st.session_state["step"] = "code"
+        st.session_state["step"] = "results"
 
-# Étape de saisie du code d'accès
-if st.session_state["step"] == "code":
-    st.header("🔒 Accès aux Résultats")
-    with st.form(key="code_form"):
-        code = st.text_input("Entrez le code d'accès pour voir vos résultats :", type="password")
-        submitted = st.form_submit_button("Valider")
-        if submitted:
-            if code == "IA2024":
-                st.session_state["show_results"] = True
-            else:
-                st.error("Code d'accès invalide. Veuillez contacter Youssef Zeboudji.")
+# Affichage des résultats
+if st.session_state["step"] == "results":
+    # Calcul des scores pour le graphique radar
+    competence_scores = {
+        "Familiarité": responses_scores.get(st.session_state["responses"].get("Question 1", "🔰 Débutant(e)"), 1),
+        "Expérience Agile": responses_scores.get(st.session_state["responses"].get("Question 2", "❓ Pas familier(e) avec ces termes"), 1),
+        "Clarté": responses_scores.get(st.session_state["responses"].get("Question 3", "⚠️ Besoin d’amélioration"), 1),
+        "Diviser une Tâche": responses_scores.get(st.session_state["responses"].get("Question 4", "❌ Non, je ne suis pas sûr(e) de comment faire"), 1),
+        "Adaptabilité du Ton": responses_scores.get(st.session_state["responses"].get("Question 5", "🛑 Peu adaptable"), 1),
+        "Structure des Réponses": responses_scores.get(st.session_state["responses"].get("Question 6", "🚧 Peu structuré"), 1)
+    }
     
-    if st.session_state["show_results"]:
-        # Calcul des scores pour le graphique radar
-        competence_scores = {
-            "Familiarité": responses_scores.get(st.session_state["responses"].get("Question 1", "🔰 Débutant(e)"), 1),
-            "Expérience Agile": responses_scores.get(st.session_state["responses"].get("Question 2", "❓ Pas familier(e) avec ces termes"), 1),
-            "Clarté": responses_scores.get(st.session_state["responses"].get("Question 3", "⚠️ Besoin d’amélioration"), 1),
-            "Diviser une Tâche": responses_scores.get(st.session_state["responses"].get("Question 4", "❌ Non, je ne suis pas sûr(e) de comment faire"), 1),
-            "Adaptabilité du Ton": responses_scores.get(st.session_state["responses"].get("Question 5", "🛑 Peu adaptable"), 1),
-            "Structure des Réponses": responses_scores.get(st.session_state["responses"].get("Question 6", "🚧 Peu structuré"), 1)
-        }
-        
-        categories = list(competence_scores.keys())
-        values = list(competence_scores.values())
-        
-        # Création du graphique radar avec Plotly
-        fig = go.Figure(data=go.Scatterpolar(
-            r=values,
-            theta=categories,
-            fill='toself',
-            marker=dict(color='rgba(56, 128, 255, 0.6)')
-        ))
-        
-        fig.update_layout(
-            title="🌟 Votre Radar de Compétences en Prompting IA 🌟",
-            polar=dict(
-                radialaxis=dict(
-                    visible=True,
-                    range=[0, 3]
-                ),
-                angularaxis=dict(showline=True, linecolor="lightgrey")
+    categories = list(competence_scores.keys())
+    values = list(competence_scores.values())
+    
+    # Création du graphique radar avec Plotly
+    fig = go.Figure(data=go.Scatterpolar(
+        r=values,
+        theta=categories,
+        fill='toself',
+        marker=dict(color='rgba(56, 128, 255, 0.6)')
+    ))
+    
+    fig.update_layout(
+        title="🌟 Votre Radar de Compétences en Prompting IA 🌟",
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 3]
             ),
-            showlegend=False
-        )
+            angularaxis=dict(showline=True, linecolor="lightgrey")
+        ),
+        showlegend=False
+    )
+    
+    st.plotly_chart(fig)
+    
+    # Calcul du pourcentage de connaissances
+    total_score = sum(values)
+    max_score = len(values) * 3
+    pourcentage = (total_score / max_score) * 100
+    
+    st.metric("🔢 Votre Niveau de Connaissance en IA", f"{pourcentage:.1f}%")
+    
+    # Proposition de formation
+    st.markdown(f"""
+        ---
+        🎓 **Prolongez votre apprentissage !**
         
-        st.plotly_chart(fig)
+        Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Pour perfectionner vos connaissances et pratiques en IA et en prompting, découvrez nos **formations personnalisées** adaptées à votre niveau.
         
-        # Calcul du pourcentage de connaissances
-        total_score = sum(values)
-        max_score = len(values) * 3
-        pourcentage = (total_score / max_score) * 100
-        
-        st.metric("🔢 Votre Niveau de Connaissance en IA", f"{pourcentage:.1f}%")
-        
-        # Proposition de formation
-        st.markdown(f"""
-            ---
-            🎓 **Prolongez votre apprentissage !**
-            
-            Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Pour perfectionner vos connaissances et pratiques en IA et en prompting, découvrez nos **formations personnalisées** adaptées à votre niveau.
-            
-            👉 [Découvrez nos formations](https://votre-site.com/formations)
-        """)
-        
-        # Bouton pour recommencer l'évaluation
-        if st.button("🔄 Recommencer l'évaluation"):
-            reset_evaluation()
+        👉 [Découvrez nos formations](https://votre-site.com/formations)
+    """)
+    
+    # Bouton pour recommencer l'évaluation
+    if st.button("🔄 Recommencer l'évaluation"):
+        reset_evaluation()
