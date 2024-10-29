@@ -163,14 +163,12 @@ st.markdown("""
 st.markdown("# 🚀 L'IA, est-ce pour moi ?")
 
 # Initialisation de l'état de session avec setdefault pour éviter KeyError
-for key in ["responses", "question_number", "show_results"]:
-    if key not in st.session_state:
-        if key == "responses":
-            st.session_state[key] = {}
-        elif key == "question_number":
-            st.session_state[key] = 0
-        elif key == "show_results":
-            st.session_state[key] = False
+if "responses" not in st.session_state:
+    st.session_state["responses"] = {}
+if "question_number" not in st.session_state:
+    st.session_state["question_number"] = 0
+if "show_results" not in st.session_state:
+    st.session_state["show_results"] = False
 
 # Définition des questions avec thèmes, emojis et options adaptées
 questions = [
@@ -213,8 +211,8 @@ def save_response(response, question_num):
     # Si c'est la dernière question, afficher les résultats
     if st.session_state["question_number"] >= len(questions):
         st.session_state["show_results"] = True
-    # Forcer le rerun pour afficher la prochaine question immédiatement
-    st.experimental_rerun()
+    # La mise à jour du session_state sera reflétée automatiquement lors du rerun
+    # Pas besoin d'utiliser st.experimental_rerun()
 
 # Fonction pour afficher une question avec fil d'Ariane
 def display_question(question_data, question_num):
