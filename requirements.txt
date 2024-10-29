@@ -1,7 +1,2 @@
-streamlit
-plotly
-pandas
-sqlite3
-datetime
-tkinter
-
+streamlit==1.25.0
+pandas==2.1.1
