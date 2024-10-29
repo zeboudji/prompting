@@ -98,8 +98,6 @@ def save_response(response, question_num):
     """Sauvegarder la réponse et passer à la question suivante"""
     st.session_state["responses"][f"Question {question_num}"] = response
     st.session_state["question_number"] += 1
-    # Mettre à jour la barre de progression
-    st.experimental_rerun()
 
 # Fonction pour afficher une question
 def display_question(question_text, choices, question_num):
@@ -213,7 +211,6 @@ if not st.session_state["show_results"]:
         display_question(question_text, choices, current_question_num)
     else:
         st.session_state["show_results"] = True
-        st.experimental_rerun()
 
 if st.session_state["show_results"]:
     display_results()
