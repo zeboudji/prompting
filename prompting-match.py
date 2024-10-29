@@ -79,6 +79,20 @@ st.markdown("""
         font-weight: bold;
         color: #4CAF50;
     }
+    /* Style pour les cartes */
+    .card {
+        background-color: #1e1e1e;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        color: #ffffff;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        transition: 0.3s;
+        cursor: pointer;
+    }
+    .card:hover {
+        background-color: #2e7d32;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -180,12 +194,17 @@ def reset_evaluation():
 def select_mode():
     """Sélectionner le mode : Projet IA ou Formation IA"""
     st.markdown("## 📋 Choisissez votre objectif")
-    mode = st.radio("Voulez-vous utiliser ce questionnaire pour :", 
-                    ("Sélectionnez une option", "Projet IA", "Formation IA"), 
-                    key="mode_selection")
-    if mode != "Sélectionnez une option":
-        st.session_state["mode"] = mode
-        st.session_state["question_number"] += 1
+    cols = st.columns(2)
+    
+    with cols[0]:
+        if st.button("🚀 Projet IA"):
+            st.session_state["mode"] = "Projet IA"
+            st.session_state["question_number"] = 1
+    
+    with cols[1]:
+        if st.button("🎓 Formation IA"):
+            st.session_state["mode"] = "Formation IA"
+            st.session_state["question_number"] = 1
 
 def select_profile():
     """Sélectionner le profil : Technique ou Non Technique"""
@@ -197,7 +216,7 @@ def select_profile():
         st.session_state["profile"] = profile
         st.session_state["question_number"] += 1
 
-def display_question(question, choices, question_num, total_questions):
+def display_question(question, choices, question_num, total_questions, current_section):
     """Afficher une question avec ses choix et le fil d'Ariane"""
     # Récupérer le thème de la question courante
     theme = questions[current_section][question_num - 1]["theme"]
@@ -205,12 +224,13 @@ def display_question(question, choices, question_num, total_questions):
     # Création du fil d'Ariane avec thèmes
     breadcrumb = '<ul class="breadcrumb">'
     for i in range(1, total_questions+1):
+        q_theme = questions[current_section][i-1]["theme"]
         if i < question_num:
-            breadcrumb += f'<li><span class="active">{questions[current_section][i-1]["theme"]}</span></li>'
+            breadcrumb += f'<li><span class="active">{q_theme}</span></li>'
         elif i == question_num:
-            breadcrumb += f'<li><span class="active">{questions[current_section][i-1]["theme"]}</span></li>'
+            breadcrumb += f'<li><span class="active">{q_theme}</span></li>'
         else:
-            breadcrumb += f'<li>{questions[current_section][i-1]["theme"]}</li>'
+            breadcrumb += f'<li>{q_theme}</li>'
     breadcrumb += '</ul>'
     st.markdown(breadcrumb, unsafe_allow_html=True)
     
@@ -228,37 +248,8 @@ def display_question(question, choices, question_num, total_questions):
 
 def display_questions():
     """Afficher les questions en fonction du mode et du profil"""
-    if st.session_state["mode"] == "Formation IA":
-        if st.session_state["profile"] == "Technique":
-            current_section = "Formation Technique"
-        else:
-            current_section = "Formation Non Technique"
-    elif st.session_state["mode"] == "Projet IA":
-        current_section = "Projet IA"
-    else:
-        current_section = None  # Pour éviter les erreurs
-
-    if current_section:
-        current_question_num = st.session_state["question_number"]
-        total_questions = len(questions[current_section])
-        
-        if current_question_num <= total_questions:
-            current_q = questions[current_section][current_question_num - 1]
-            display_question(current_q["question"], current_q["choices"], current_question_num, total_questions)
-        else:
-            st.session_state["show_results"] = True
-    else:
-        st.error("Mode inconnu. Veuillez réinitialiser l'évaluation.")
-
-def display_results():
-    """Afficher les résultats après l'évaluation"""
-    st.markdown("<div class='result-container'><h2>🌟 Félicitations ! 🌟</h2></div>", unsafe_allow_html=True)
-    st.balloons()
-    
-    # Déterminer le mode actuel
     mode = st.session_state["mode"]
     
-    # Déterminer le profil si mode est Formation IA
     if mode == "Formation IA":
         profile = st.session_state["profile"]
         if profile == "Technique":
@@ -268,23 +259,52 @@ def display_results():
     elif mode == "Projet IA":
         current_section = "Projet IA"
     else:
-        current_section = None  # Pour éviter les erreurs
+        st.error("Mode inconnu. Veuillez réinitialiser l'évaluation.")
+        return
+    
+    current_question_num = st.session_state["question_number"]
+    total_questions = len(questions[current_section])
+    
+    if current_question_num <= total_questions:
+        current_q = questions[current_section][current_question_num - 1]
+        display_question(current_q["question"], current_q["choices"], current_question_num, total_questions, current_section)
+    else:
+        st.session_state["show_results"] = True
 
+def display_results():
+    """Afficher les résultats après l'évaluation"""
+    st.markdown("<div class='result-container'><h2>🌟 Félicitations ! 🌟</h2></div>", unsafe_allow_html=True)
+    st.balloons()
+    
+    mode = st.session_state["mode"]
+    
+    if mode == "Formation IA":
+        profile = st.session_state["profile"]
+        if profile == "Technique":
+            current_section = "Formation Technique"
+        else:
+            current_section = "Formation Non Technique"
+    elif mode == "Projet IA":
+        current_section = "Projet IA"
+    else:
+        st.error("Mode inconnu.")
+        return
+    
     # Calcul des scores pour le graphique radar
     competence_scores = {}
     for idx, q in enumerate(questions[current_section], 1):
         response = st.session_state["responses"].get(f"Question {idx}", "🔴 Aucun")
         score = responses_scores.get(response, 1)
         competence_scores[q["theme"]] = score
-
+    
     categories = list(competence_scores.keys())
     values = list(competence_scores.values())
-
+    
     # Calcul du pourcentage de connaissances
     total_score = sum(values)
     max_score = len(values) * 3
     pourcentage = (total_score / max_score) * 100
-
+    
     # Détermination du niveau basé sur le pourcentage
     if mode == "Formation IA":
         if pourcentage < 60:
@@ -303,11 +323,11 @@ def display_results():
     else:
         niveau = "Inconnu"
         niveau_message = "Mode inconnu."
-
+    
     # Afficher le pourcentage et le niveau
     st.markdown(f"### 🔢 Votre Niveau de Compétence en IA: **{pourcentage:.1f}%**")
     st.markdown(f"### **{niveau}**")
-
+    
     # Création du graphique radar avec Plotly
     fig = go.Figure(data=go.Scatterpolar(
         r=values,
@@ -315,7 +335,7 @@ def display_results():
         fill='toself',
         marker=dict(color='rgba(56, 128, 255, 0.6)')
     ))
-
+    
     fig.update_layout(
         title="🌟 Votre Radar de Compétences en IA 🌟",
         polar=dict(
@@ -330,16 +350,16 @@ def display_results():
         showlegend=False,
         template="plotly_dark"
     )
-
+    
     st.plotly_chart(fig, use_container_width=True)
-
+    
     # Message de niveau
     st.markdown(f"""
         <div style='text-align: center; padding: 10px;'>
             <b>{niveau_message}</b>
         </div>
     """, unsafe_allow_html=True)
-
+    
     # Proposition de formation avec lien
     if mode == "Formation IA":
         st.markdown(f"""
@@ -376,12 +396,41 @@ def display_results():
         reset_evaluation()
     st.markdown("</div>", unsafe_allow_html=True)
 
-# Afficher le mode de l'utilisateur
-if not st.session_state["mode"]:
-    select_mode()
-elif st.session_state["mode"] == "Formation IA" and not st.session_state["profile"]:
-    select_profile()
-elif not st.session_state["show_results"]:
-    display_questions()
-else:
-    display_results()
+def display_initial_selection():
+    """Afficher la sélection initiale avec deux cartes"""
+    st.markdown("## 📋 Choisissez votre objectif")
+    cols = st.columns(2)
+    
+    with cols[0]:
+        if st.button("🚀 Projet IA"):
+            st.session_state["mode"] = "Projet IA"
+            st.session_state["question_number"] = 1
+    
+    with cols[1]:
+        if st.button("🎓 Formation IA"):
+            st.session_state["mode"] = "Formation IA"
+            st.session_state["question_number"] = 1
+
+def display_profile_selection():
+    """Afficher la sélection du profil pour Formation IA"""
+    st.markdown("## 🎓 Sélectionnez votre profil")
+    profile = st.radio("Pour une Formation IA, veuillez indiquer votre profil :", 
+                       ("Sélectionnez une option", "Technique", "Non Technique"), 
+                       key="profile_selection")
+    if profile != "Sélectionnez une option":
+        st.session_state["profile"] = profile
+        st.session_state["question_number"] += 1
+
+def main():
+    """Fonction principale pour gérer l'affichage"""
+    if not st.session_state["mode"]:
+        display_initial_selection()
+    elif st.session_state["mode"] == "Formation IA" and not st.session_state["profile"]:
+        display_profile_selection()
+    elif not st.session_state["show_results"]:
+        display_questions()
+    else:
+        display_results()
+
+if __name__ == "__main__":
+    main()
