@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
-import time
+import plotly.graph_objects as go
 
 # Title with Emoji
 st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
@@ -23,7 +22,11 @@ questions = [
     ("🔍 **Comment définiriez-vous votre capacité à exprimer des besoins clairs et spécifiques pour une tâche ?**",
      ["Sélectionnez une réponse", "📝 Très clair et structuré", "📄 Clair, mais manque parfois de détails", "⚠️ Besoin d’amélioration"]),
     ("📐 **Savez-vous diviser une tâche en plusieurs étapes pour aider l’IA à répondre plus précisément ?**",
-     ["Sélectionnez une réponse", "✔️ Oui, j’utilise cette approche régulièrement", "🔄 J’ai quelques idées, mais je pourrais m’améliorer", "❌ Non, je ne suis pas sûr(e) de comment faire"])
+     ["Sélectionnez une réponse", "✔️ Oui, j’utilise cette approche régulièrement", "🔄 J’ai quelques idées, mais je pourrais m’améliorer", "❌ Non, je ne suis pas sûr(e) de comment faire"]),
+    ("🎯 **Comment évalueriez-vous votre capacité à adapter le ton du prompt au contexte ?**",
+     ["Sélectionnez une réponse", "🗣 Très adaptable", "😊 Souvent adaptable", "🛑 Peu adaptable"]),
+    ("🎯 **Comment évalueriez-vous votre capacité à structurer les réponses pour obtenir des informations claires et organisées ?**",
+     ["Sélectionnez une réponse", "📊 Très structuré", "📈 Parfois structuré", "🚧 Peu structuré"])
 ]
 
 # Mapping responses to a numeric score for radar chart
@@ -31,7 +34,9 @@ responses_scores = {
     "🔰 Débutant(e)": 1, "📘 Intermédiaire": 2, "🌟 Avancé(e)": 3,
     "❓ Pas familier(e) avec ces termes": 1, "📙 Non, mais curieux(se) d’en apprendre plus": 2, "✅ Oui": 3,
     "⚠️ Besoin d’amélioration": 1, "📄 Clair, mais manque parfois de détails": 2, "📝 Très clair et structuré": 3,
-    "❌ Non, je ne suis pas sûr(e) de comment faire": 1, "🔄 J’ai quelques idées, mais je pourrais m’améliorer": 2, "✔️ Oui, j’utilise cette approche régulièrement": 3
+    "❌ Non, je ne suis pas sûr(e) de comment faire": 1, "🔄 J’ai quelques idées, mais je pourrais m’améliorer": 2, "✔️ Oui, j’utilise cette approche régulièrement": 3,
+    "🛑 Peu adaptable": 1, "😊 Souvent adaptable": 2, "🗣 Très adaptable": 3,
+    "🚧 Peu structuré": 1, "📈 Parfois structuré": 2, "📊 Très structuré": 3
 }
 
 # Display current question with enhanced visibility and background color
@@ -49,21 +54,34 @@ else:
         "Familiarité": responses_scores[st.session_state.get("question_1", "🔰 Débutant(e)")],
         "Expérience Agile": responses_scores[st.session_state.get("question_2", "❓ Pas familier(e) avec ces termes")],
         "Clarté": responses_scores[st.session_state.get("question_3", "⚠️ Besoin d’amélioration")],
-        "Diviser une Tâche": responses_scores[st.session_state.get("question_4", "❌ Non, je ne suis pas sûr(e) de comment faire")]
+        "Diviser une Tâche": responses_scores[st.session_state.get("question_4", "❌ Non, je ne suis pas sûr(e) de comment faire")],
+        "Adaptabilité du Ton": responses_scores[st.session_state.get("question_5", "🛑 Peu adaptable")],
+        "Structure des Réponses": responses_scores[st.session_state.get("question_6", "🚧 Peu structuré")]
     }
     
     # DataFrame for Radar Chart
-    df = pd.DataFrame(dict(
-        competence=list(competence_scores.keys()),
-        score=list(competence_scores.values())
+    categories = list(competence_scores.keys())
+    values = list(competence_scores.values())
+    
+    # Enhanced radar chart with Plotly
+    fig = go.Figure(data=go.Scatterpolar(
+        r=values,
+        theta=categories,
+        fill='toself',
+        marker=dict(color='rgba(56, 128, 255, 0.6)')
     ))
     
-    # Radar chart with Plotly
-    fig = px.line_polar(df, r='score', theta='competence', line_close=True)
-    fig.update_traces(fill='toself')
-    fig.update_layout(title="🎯 Votre Radar de Compétences en Prompting IA", 
-                      font=dict(size=14), 
-                      polar=dict(radialaxis=dict(visible=True, range=[0, 3])))
+    fig.update_layout(
+        title="🌟 Votre Radar de Compétences en Prompting IA 🌟",
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 3]
+            ),
+            angularaxis=dict(showline=True, linecolor="lightgrey")
+        ),
+        showlegend=False
+    )
     
     # Display radar chart
     st.plotly_chart(fig)
