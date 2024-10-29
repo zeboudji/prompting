@@ -1,7 +1,37 @@
 import streamlit as st
 import plotly.graph_objects as go
 
-# Titre avec Emoji
+# Configuration de la page
+st.set_page_config(
+    page_title="Évaluation des Compétences en IA",
+    page_icon="🚀",
+    layout="centered",
+    initial_sidebar_state="auto",
+)
+
+# Styles personnalisés
+st.markdown("""
+    <style>
+    .question-container {
+        padding: 20px;
+        background-color: #f0f8ff;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    .result-container {
+        padding: 20px;
+        background-color: #e6ffe6;
+        border-radius: 10px;
+        text-align: center;
+    }
+    .button-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Titre principal
 st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
 
 # Initialisation de l'état de session
@@ -46,28 +76,24 @@ responses_scores = {
     "🚧 Peu structuré": 1, "📈 Parfois structuré": 2, "📊 Très structuré": 3
 }
 
-# Affichage des questions
-if st.session_state["show_results"] == False:
-    if st.session_state["question_number"] < len(questions):
-        current_q = questions[st.session_state["question_number"]]
-        question_text, choices = current_q
-        st.markdown(f"<div style='padding: 20px; background-color: #e3f2fd; border-radius: 10px; color: #0d47a1;'><b>{question_text}</b></div>", unsafe_allow_html=True)
-        
-        selected = st.selectbox("Sélectionnez une réponse :", choices)
-        
-        if st.button("Suivant"):
-            if selected != "Sélectionnez une réponse":
-                st.session_state["responses"][f"Question {st.session_state['question_number'] +1}"] = selected
+# Fonction pour afficher une question
+def display_question(question_text, choices, question_num):
+    st.markdown(f"<div class='question-container'><b>{question_text}</b></div>", unsafe_allow_html=True)
+    with st.form(key=f"form_{question_num}"):
+        response = st.radio("Sélectionnez une réponse :", choices, key=f"response_{question_num}")
+        submitted = st.form_submit_button("Suivant")
+        if submitted:
+            if response != "Sélectionnez une réponse":
+                st.session_state["responses"][f"Question {question_num}"] = response
                 next_question()
             else:
                 st.error("Veuillez sélectionner une réponse valide.")
-    else:
-        # Toutes les questions ont été répondues, afficher le bouton pour voir les résultats
-        if st.button("Voir les Résultats"):
-            st.session_state["show_results"] = True
 
-# Affichage des résultats
-if st.session_state["show_results"]:
+# Fonction pour afficher les résultats
+def display_results():
+    st.markdown("<div class='result-container'><h2>🌟 Félicitations ! 🌟</h2></div>", unsafe_allow_html=True)
+    st.balloons()
+    
     # Calcul des scores pour le graphique radar
     competence_scores = {
         "Familiarité": responses_scores.get(st.session_state["responses"].get("Question 1", "🔰 Débutant(e)"), 1),
@@ -110,16 +136,32 @@ if st.session_state["show_results"]:
     
     st.metric("🔢 Votre Niveau de Connaissance en IA", f"{pourcentage:.1f}%")
     
-    # Proposition de formation
+    # Félicitations et proposition de formation
     st.markdown(f"""
         ---
-        🎓 **Prolongez votre apprentissage !**
+        🎓 **Félicitations !** 🎓
         
-        Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Pour perfectionner vos connaissances et pratiques en IA et en prompting, découvrez nos **formations personnalisées** adaptées à votre niveau.
+        Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Cela démontre une forte compatibilité avec nos formations avancées qui vous permettront de devenir un véritable **pro de l'IA**.
         
         👉 [Découvrez nos formations](https://votre-site.com/formations)
     """)
     
     # Bouton pour recommencer l'évaluation
+    st.markdown("<div class='button-container'>", unsafe_allow_html=True)
     if st.button("🔄 Recommencer l'évaluation"):
         reset_evaluation()
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# Affichage des questions ou des résultats selon l'état
+if st.session_state["show_results"] == False:
+    if st.session_state["question_number"] < len(questions):
+        current_question_num = st.session_state["question_number"] + 1
+        current_q = questions[st.session_state["question_number"]]
+        question_text, choices = current_q
+        display_question(question_text, choices, current_question_num)
+    else:
+        st.session_state["show_results"] = True
+        st.experimental_rerun()
+
+if st.session_state["show_results"]:
+    display_results()
