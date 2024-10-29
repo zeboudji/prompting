@@ -1,5 +1,6 @@
 streamlit
 plotly
 pandas
-email
-gitpython
+sqlite3
+datetime
+tkinter
