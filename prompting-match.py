@@ -12,16 +12,16 @@ st.title("Évaluation Interactive des Compétences en Prompting IA")
 if "question_number" not in st.session_state:
     st.session_state["question_number"] = 1
 
-# Define questions and responses
+# Define questions and responses with a default "Select" option
 questions = [
     ("Quel est votre niveau de familiarité avec l’écriture de prompts pour l’IA ?",
-     ["Débutant(e)", "Intermédiaire", "Avancé(e)"]),
+     ["Sélectionnez une réponse", "Débutant(e)", "Intermédiaire", "Avancé(e)"]),
     ("Utilisez-vous déjà des techniques d’expression de besoin comme les User Stories ou les Epics ?",
-     ["Oui", "Non, mais curieux(se) d’en apprendre plus", "Pas familier(e) avec ces termes"]),
+     ["Sélectionnez une réponse", "Oui", "Non, mais curieux(se) d’en apprendre plus", "Pas familier(e) avec ces termes"]),
     ("Comment définiriez-vous votre capacité à exprimer des besoins clairs et spécifiques pour une tâche ?",
-     ["Très clair et structuré", "Clair, mais manque parfois de détails", "Besoin d’amélioration"]),
+     ["Sélectionnez une réponse", "Très clair et structuré", "Clair, mais manque parfois de détails", "Besoin d’amélioration"]),
     ("Savez-vous diviser une tâche en plusieurs étapes pour aider l’IA à répondre plus précisément ?",
-     ["Oui, j’utilise cette approche régulièrement", "J’ai quelques idées, mais je pourrais m’améliorer", "Non, je ne suis pas sûr(e) de comment faire"])
+     ["Sélectionnez une réponse", "Oui, j’utilise cette approche régulièrement", "J’ai quelques idées, mais je pourrais m’améliorer", "Non, je ne suis pas sûr(e) de comment faire"])
 ]
 
 # Mapping responses to a numeric score
@@ -32,12 +32,12 @@ responses_scores = {
     "Non, je ne suis pas sûr(e) de comment faire": 1, "J’ai quelques idées, mais je pourrais m’améliorer": 2, "Oui, j’utilise cette approche régulièrement": 3
 }
 
-# Display the current question
+# Display the current question only if a valid response is selected
 question_text, choices = questions[st.session_state["question_number"] - 1]
-response = st.radio(question_text, choices, key=f"question_{st.session_state['question_number']}")
+response = st.selectbox(question_text, choices, key=f"question_{st.session_state['question_number']}")
 
-# Move to next question automatically when answered
-if response:
+# Move to next question automatically when a valid answer (not "Sélectionnez une réponse") is chosen
+if response != "Sélectionnez une réponse":
     st.session_state[f"response_{st.session_state['question_number']}"] = response
     time.sleep(1)  # Adding a delay to simulate a smooth transition
     st.session_state["question_number"] += 1
