@@ -289,7 +289,7 @@ def display_results():
     )
 
     # Création du contenu HTML complet pour la page des résultats
-    st.markdown("<div class='container result-container'>/div>", unsafe_allow_html=True)
+    st.markdown("<div class='container result-container'></div>", unsafe_allow_html=True)
     
     # Icône de félicitations
     st.markdown("<div class='icon'>🌟</div>", unsafe_allow_html=True)
