@@ -12,359 +12,100 @@ st.set_page_config(
 # Styles personnalisés
 st.markdown("""
     <style>
-    /* Style général de la page */
-    .main {
-        background-color: #121212;
-        color: #ffffff;
-    }
-    /* Style pour les conteneurs de questions */
     .question-container {
         padding: 20px;
-        background-color: #1e1e1e;
+        background-color: #f0f8ff;
         border-radius: 10px;
         margin-bottom: 20px;
-        color: #ffffff;
     }
-    /* Style pour le conteneur des résultats */
     .result-container {
         padding: 20px;
-        background-color: #2e7d32;
+        background-color: #e6ffe6;
         border-radius: 10px;
         text-align: center;
-        color: #ffffff;
     }
-    /* Style pour les boutons */
     .button-container {
         text-align: center;
         margin-top: 20px;
     }
-    /* Style pour les textes d'erreur */
-    .error-message {
-        color: #ff1744;
-    }
-    /* Style pour le bouton "Découvrez nos formations" en haut à droite */
-    .top-right-button {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-    }
-    /* Style pour la barre de progression avec fil d'Ariane */
-    .breadcrumb {
-        list-style: none;
-        display: flex;
-        justify-content: space-between;
-        padding: 0;
-        margin-bottom: 20px;
-    }
-    .breadcrumb li {
-        flex: 1;
-        text-align: center;
-        position: relative;
-    }
-    .breadcrumb li::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        right: -50%;
-        width: 100%;
-        height: 2px;
-        background-color: #4CAF50;
-        z-index: -1;
-    }
-    .breadcrumb li:last-child::after {
-        content: none;
-    }
-    .breadcrumb .active {
-        font-weight: bold;
-        color: #4CAF50;
-    }
-    /* Style pour les cartes */
-    .card {
-        background-color: #1e1e1e;
-        border-radius: 10px;
-        padding: 20px;
-        text-align: center;
-        color: #ffffff;
-        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-        transition: 0.3s;
-        cursor: pointer;
-    }
-    .card:hover {
-        background-color: #2e7d32;
-    }
-    /* Style pour le titre des cartes */
-    .card-title {
-        font-size: 1.5em;
-        margin-bottom: 10px;
-    }
-    /* Style pour les descriptions des cartes */
-    .card-description {
-        font-size: 1em;
-        color: #cccccc;
-    }
     </style>
     """, unsafe_allow_html=True)
 
-# Bouton "Découvrez nos formations" en haut à droite
-st.markdown("""
-    <div class="top-right-button">
-        <a href="https://insidegroup.fr/actualites/acculturation-ia/" target="_blank">
-            <button style="
-                background-color: #4CAF50; 
-                color: white; 
-                padding: 10px 20px; 
-                text-align: center; 
-                text-decoration: none; 
-                display: inline-block; 
-                font-size: 16px; 
-                border: none; 
-                border-radius: 5px;
-                cursor: pointer;">
-                📚 Découvrez nos formations
-            </button>
-        </a>
-    </div>
-    """, unsafe_allow_html=True)
-
 # Titre principal
-st.markdown("# 🚀 Évaluation Interactive des Compétences en IA et IA Assistée")
+st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
 
-# Initialisation de l'état de session avec setdefault pour éviter KeyError
-for key in ["responses", "question_number", "show_results", "mode", "profile"]:
-    if key not in st.session_state:
-        if key == "responses":
-            st.session_state[key] = {}
-        elif key == "question_number":
-            st.session_state[key] = 0
-        elif key == "show_results":
-            st.session_state[key] = False
-        else:
-            st.session_state[key] = None
+# Initialisation de l'état de session
+if "responses" not in st.session_state:
+    st.session_state["responses"] = {}
+    st.session_state["question_number"] = 0
+    st.session_state["show_results"] = False
 
-# Définition des questions pour différentes sections
-questions = {
-    "Formation Technique": [
-        {"theme": "Compétences Techniques", "question": "🔍 **À quel point êtes-vous à l'aise avec les langages de programmation (Python, R, etc.) ?**",
-         "choices": ["Sélectionnez une réponse", "🟢 Très à l'aise", "🟡 Assez à l'aise", "🔴 Peu à l'aise"]},
-        {"theme": "Outils IA", "question": "🤖 **Quelle est votre expérience avec les frameworks d'IA tels que TensorFlow ou PyTorch ?**",
-         "choices": ["Sélectionnez une réponse", "🟢 Expérimenté(e)", "🟡 Connaissances de base", "🔴 Aucune expérience"]},
-        {"theme": "Gestion de Projet", "question": "📊 **Avez-vous déjà géré des projets impliquant l'intégration de l'IA ?**",
-         "choices": ["Sélectionnez une réponse", "🟢 Oui, plusieurs", "🟡 Quelques-uns", "🔴 Aucun"]},
-    ],
-    "Formation Non Technique": [
-        {"theme": "Connaissances de Base", "question": "🔍 **Comprenez-vous les concepts fondamentaux de l'intelligence artificielle et du machine learning ?**",
-         "choices": ["Sélectionnez une réponse", "🟢 Oui, bien", "🟡 Moyennement", "🔴 Non"]},
-        {"theme": "Utilisation d'Outils", "question": "🛠️ **Avez-vous déjà utilisé des outils d'IA pour des tâches non techniques (ex. marketing, gestion) ?**",
-         "choices": ["Sélectionnez une réponse", "🟢 Oui, régulièrement", "🟡 Parfois", "🔴 Jamais"]},
-        {"theme": "Adaptabilité", "question": "📚 **Êtes-vous prêt(e) à apprendre et à adopter de nouvelles technologies liées à l'IA ?**",
-         "choices": ["Sélectionnez une réponse", "🟢 Très prêt(e)", "🟡 Assez prêt(e)", "🔴 Pas vraiment"]},
-    ],
-    "Projet IA": [
-        {"theme": "Connaissances Numériques", "question": "💻 **À quel point êtes-vous à l'aise avec l'utilisation des technologies numériques dans votre travail actuel ?**",
-         "choices": ["Sélectionnez une réponse", "🟢 Très à l'aise", "🟡 Assez à l'aise", "🔴 Peu à l'aise"]},
-        {"theme": "Utilisation d'Outils Automatisés", "question": "🔧 **Votre emploi actuel implique-t-il l'utilisation fréquente de logiciels ou d'outils automatisés ?**",
-         "choices": ["Sélectionnez une réponse", "🟢 Fréquemment", "🟡 Parfois", "🔴 Rarement"]},
-        {"theme": "Expérience avec l'IA", "question": "🤖 **Quelle est votre expérience avec les technologies d'intelligence artificielle (IA) ou d'apprentissage automatique (Machine Learning) ?**",
-         "choices": ["Sélectionnez une réponse", "🟢 Expérimenté(e)", "🟡 Connaissances de base", "🔴 Aucune expérience"]},
-        {"theme": "Capacité d'Apprentissage", "question": "📚 **Comment évaluez-vous votre capacité à apprendre et à adopter de nouvelles technologies dans votre domaine ?**",
-         "choices": ["Sélectionnez une réponse", "🟢 Très bonne", "🟡 Moyenne", "🔴 Faible"]},
-        {"theme": "Impact de l'IA sur le Travail", "question": "🚀 **Dans quelle mesure pensez-vous que l'IA pourrait améliorer l'efficacité de votre travail ?**",
-         "choices": ["Sélectionnez une réponse", "🟢 Beaucoup", "🟡 Modérément", "🔴 Peu"]},
-        {"theme": "Bénéfices Potentiels de l'IA", "question": "🎯 **Quels aspects de votre travail actuel pensez-vous pourraient bénéficier d'une automatisation ou d'une assistance par l'IA ?**",
-         "choices": ["Sélectionnez une réponse", "🟢 Tâches répétitives", "🟡 Analyse de données", "🔴 Créativité et prise de décision"]},
-    ]
-}
+def next_question():
+    """Fonction pour passer à la question suivante"""
+    st.session_state["question_number"] += 1
+
+def reset_evaluation():
+    """Fonction pour recommencer l'évaluation"""
+    st.session_state["responses"] = {}
+    st.session_state["question_number"] = 0
+    st.session_state["show_results"] = False
+
+# Définition des questions avec emojis et options
+questions = [
+    ("🌱 **Quel est votre niveau de familiarité avec l’écriture de prompts pour l’IA ?**",
+     ["Sélectionnez une réponse", "🔰 Débutant(e)", "📘 Intermédiaire", "🌟 Avancé(e)"]),
+    ("🧩 **Utilisez-vous déjà des techniques d’expression de besoin comme les User Stories ou les Epics ?**",
+     ["Sélectionnez une réponse", "✅ Oui", "📙 Non, mais curieux(se) d’en apprendre plus", "❓ Pas familier(e) avec ces termes"]),
+    ("🔍 **Comment définiriez-vous votre capacité à exprimer des besoins clairs et spécifiques pour une tâche ?**",
+     ["Sélectionnez une réponse", "📝 Très clair et structuré", "📄 Clair, mais manque parfois de détails", "⚠️ Besoin d’amélioration"]),
+    ("📐 **Savez-vous diviser une tâche en plusieurs étapes pour aider l’IA à répondre plus précisément ?**",
+     ["Sélectionnez une réponse", "✔️ Oui, j’utilise cette approche régulièrement", "🔄 J’ai quelques idées, mais je pourrais m’améliorer", "❌ Non, je ne suis pas sûr(e) de comment faire"]),
+    ("🎯 **Comment évalueriez-vous votre capacité à adapter le ton du prompt au contexte ?**",
+     ["Sélectionnez une réponse", "🗣 Très adaptable", "😊 Souvent adaptable", "🛑 Peu adaptable"]),
+    ("🎯 **Comment évalueriez-vous votre capacité à structurer les réponses pour obtenir des informations claires et organisées ?**",
+     ["Sélectionnez une réponse", "📊 Très structuré", "📈 Parfois structuré", "🚧 Peu structuré"])
+]
 
 # Mapping des réponses à un score numérique pour le graphique radar
 responses_scores = {
-    "🟢 Très à l'aise": 3, "🟡 Assez à l'aise": 2, "🔴 Peu à l'aise": 1,
-    "🟢 Expérimenté(e)": 3, "🟡 Connaissances de base": 2, "🔴 Aucune expérience": 1,
-    "🟢 Oui, bien": 3, "🟡 Moyennement": 2, "🔴 Non": 1,
-    "🟢 Oui, régulièrement": 3, "🟡 Parfois": 2, "🔴 Jamais": 1,
-    "🟢 Très prêt(e)": 3, "🟡 Assez prêt(e)": 2, "🔴 Pas vraiment": 1,
-    "🟢 Fréquemment": 3, "🟡 Parfois": 2, "🔴 Rarement": 1,
-    "🟢 Très bonne": 3, "🟡 Moyenne": 2, "🔴 Faible": 1,
-    "🟢 Beaucoup": 3, "🟡 Modérément": 2, "🔴 Peu": 1,
-    "🟢 Tâches répétitives": 3, "🟡 Analyse de données": 2, "🔴 Créativité et prise de décision": 1
+    "🔰 Débutant(e)": 1, "📘 Intermédiaire": 2, "🌟 Avancé(e)": 3,
+    "❓ Pas familier(e) avec ces termes": 1, "📙 Non, mais curieux(se) d’en apprendre plus": 2, "✅ Oui": 3,
+    "⚠️ Besoin d’amélioration": 1, "📄 Clair, mais manque parfois de détails": 2, "📝 Très clair et structuré": 3,
+    "❌ Non, je ne suis pas sûr(e) de comment faire": 1, "🔄 J’ai quelques idées, mais je pourrais m’améliorer": 2, "✔️ Oui, j’utilise cette approche régulièrement": 3,
+    "🛑 Peu adaptable": 1, "😊 Souvent adaptable": 2, "🗣 Très adaptable": 3,
+    "🚧 Peu structuré": 1, "📈 Parfois structuré": 2, "📊 Très structuré": 3
 }
 
-def reset_evaluation():
-    """Réinitialiser l'évaluation"""
-    for key in ["responses", "question_number", "show_results", "mode", "profile"]:
-        if key == "responses":
-            st.session_state[key] = {}
-        elif key == "question_number":
-            st.session_state[key] = 0
-        elif key == "show_results":
-            st.session_state[key] = False
-        else:
-            st.session_state[key] = None
+# Fonction pour afficher une question
+def display_question(question_text, choices, question_num):
+    st.markdown(f"<div class='question-container'><b>{question_text}</b></div>", unsafe_allow_html=True)
+    with st.form(key=f"form_{question_num}"):
+        response = st.radio("Sélectionnez une réponse :", choices, key=f"response_{question_num}")
+        submitted = st.form_submit_button("Suivant")
+        if submitted:
+            if response != "Sélectionnez une réponse":
+                st.session_state["responses"][f"Question {question_num}"] = response
+                next_question()
+            else:
+                st.error("Veuillez sélectionner une réponse valide.")
 
-def select_mode():
-    """Sélectionner le mode : Projet IA ou Formation IA avec des cartes interactives"""
-    st.markdown("## 📋 Choisissez votre objectif")
-    cols = st.columns(2)
-    
-    with cols[0]:
-        st.markdown("""
-            <div class="card">
-                <div class="card-title">🚀 Projet IA</div>
-                <div class="card-description">Évaluez vos prérequis pour lancer un projet en Intelligence Artificielle.</div>
-            </div>
-            """, unsafe_allow_html=True)
-        if st.button("Sélectionner Projet IA"):
-            st.session_state["mode"] = "Projet IA"
-            st.session_state["question_number"] = 1
-    
-    with cols[1]:
-        st.markdown("""
-            <div class="card">
-                <div class="card-title">🎓 Formation IA</div>
-                <div class="card-description">Évaluez votre compatibilité avec nos formations en Intelligence Artificielle.</div>
-            </div>
-            """, unsafe_allow_html=True)
-        if st.button("Sélectionner Formation IA"):
-            st.session_state["mode"] = "Formation IA"
-            st.session_state["question_number"] = 1
-
-def select_profile():
-    """Sélectionner le profil : Technique ou Non Technique avec des cartes interactives"""
-    st.markdown("## 🎓 Sélectionnez votre profil")
-    cols = st.columns(2)
-    
-    with cols[0]:
-        st.markdown("""
-            <div class="card">
-                <div class="card-title">💻 Technique</div>
-                <div class="card-description">Profil avec des compétences techniques et/ou en programmation.</div>
-            </div>
-            """, unsafe_allow_html=True)
-        if st.button("Sélectionner Technique"):
-            st.session_state["profile"] = "Technique"
-            st.session_state["question_number"] += 1
-    
-    with cols[1]:
-        st.markdown("""
-            <div class="card">
-                <div class="card-title">🧑‍💼 Non Technique</div>
-                <div class="card-description">Profil sans compétences techniques avancées en programmation.</div>
-            </div>
-            """, unsafe_allow_html=True)
-        if st.button("Sélectionner Non Technique"):
-            st.session_state["profile"] = "Non Technique"
-            st.session_state["question_number"] += 1
-
-def display_question(question, choices, question_num, total_questions, current_section):
-    """Afficher une question avec ses choix et le fil d'Ariane"""
-    # Récupérer le thème de la question courante
-    theme = questions[current_section][question_num - 1]["theme"]
-
-    # Création du fil d'Ariane avec thèmes
-    breadcrumb = '<ul class="breadcrumb">'
-    for i in range(1, total_questions+1):
-        q_theme = questions[current_section][i-1]["theme"]
-        if i < question_num:
-            breadcrumb += f'<li><span class="active">{q_theme}</span></li>'
-        elif i == question_num:
-            breadcrumb += f'<li><span class="active">{q_theme}</span></li>'
-        else:
-            breadcrumb += f'<li>{q_theme}</li>'
-    breadcrumb += '</ul>'
-    st.markdown(breadcrumb, unsafe_allow_html=True)
-    
-    # Affichage de la question
-    st.markdown(f"<div class='question-container'><b>{question}</b></div>", unsafe_allow_html=True)
-    
-    # Gestion des réponses avec callback
-    selected = st.radio("Sélectionnez une réponse :", choices, key=f"response_{question_num}")
-    
-    if selected != "Sélectionnez une réponse":
-        st.session_state["responses"][f"Question {question_num}"] = selected
-        st.session_state["question_number"] += 1
-    else:
-        st.markdown("<span class='error-message'>Veuillez sélectionner une réponse valide.</span>", unsafe_allow_html=True)
-
-def display_questions():
-    """Afficher les questions en fonction du mode et du profil"""
-    mode = st.session_state["mode"]
-    
-    if mode == "Formation IA":
-        profile = st.session_state["profile"]
-        if profile == "Technique":
-            current_section = "Formation Technique"
-        else:
-            current_section = "Formation Non Technique"
-    elif mode == "Projet IA":
-        current_section = "Projet IA"
-    else:
-        st.error("Mode inconnu. Veuillez réinitialiser l'évaluation.")
-        return
-    
-    current_question_num = st.session_state["question_number"]
-    total_questions = len(questions[current_section])
-    
-    if current_question_num <= total_questions:
-        current_q = questions[current_section][current_question_num - 1]
-        display_question(current_q["question"], current_q["choices"], current_question_num, total_questions, current_section)
-    else:
-        st.session_state["show_results"] = True
-
+# Fonction pour afficher les résultats
 def display_results():
-    """Afficher les résultats après l'évaluation"""
     st.markdown("<div class='result-container'><h2>🌟 Félicitations ! 🌟</h2></div>", unsafe_allow_html=True)
     st.balloons()
     
-    mode = st.session_state["mode"]
-    
-    if mode == "Formation IA":
-        profile = st.session_state["profile"]
-        if profile == "Technique":
-            current_section = "Formation Technique"
-        else:
-            current_section = "Formation Non Technique"
-    elif mode == "Projet IA":
-        current_section = "Projet IA"
-    else:
-        current_section = None  # Pour éviter les erreurs
-    
     # Calcul des scores pour le graphique radar
-    competence_scores = {}
-    for idx, q in enumerate(questions[current_section], 1):
-        response = st.session_state["responses"].get(f"Question {idx}", "🔴 Aucun")
-        score = responses_scores.get(response, 1)
-        competence_scores[q["theme"]] = score
+    competence_scores = {
+        "Familiarité": responses_scores.get(st.session_state["responses"].get("Question 1", "🔰 Débutant(e)"), 1),
+        "Expérience Agile": responses_scores.get(st.session_state["responses"].get("Question 2", "❓ Pas familier(e) avec ces termes"), 1),
+        "Clarté": responses_scores.get(st.session_state["responses"].get("Question 3", "⚠️ Besoin d’amélioration"), 1),
+        "Diviser une Tâche": responses_scores.get(st.session_state["responses"].get("Question 4", "❌ Non, je ne suis pas sûr(e) de comment faire"), 1),
+        "Adaptabilité du Ton": responses_scores.get(st.session_state["responses"].get("Question 5", "🛑 Peu adaptable"), 1),
+        "Structure des Réponses": responses_scores.get(st.session_state["responses"].get("Question 6", "🚧 Peu structuré"), 1)
+    }
     
     categories = list(competence_scores.keys())
     values = list(competence_scores.values())
-    
-    # Calcul du pourcentage de connaissances
-    total_score = sum(values)
-    max_score = len(values) * 3
-    pourcentage = (total_score / max_score) * 100
-    
-    # Détermination du niveau basé sur le pourcentage
-    if mode == "Formation IA":
-        if pourcentage < 60:
-            niveau = "🎓 Sensibilisation à l'IA"
-            niveau_message = "Vous êtes éligible à la **Sensibilisation** pour mieux comprendre les fondamentaux de l'IA. Toutes les conditions sont réunies !"
-        else:
-            niveau = "🚀 Acculturation pour devenir un AS de l'IA"
-            niveau_message = "Félicitations ! Vous êtes éligible à l'**Acculturation** pour devenir un **AS de l'IA**. Toutes les conditions sont réunies !"
-    elif mode == "Projet IA":
-        if pourcentage < 60:
-            niveau = "🛠️ Prérequis insuffisants"
-            niveau_message = "Il semble que vous n'ayez pas encore les prérequis nécessaires pour lancer un projet IA. Découvrez nos formations pour vous préparer."
-        else:
-            niveau = "✅ Prérequis satisfaits"
-            niveau_message = "Vous possédez les prérequis nécessaires pour démarrer un projet IA. Contactez-nous pour bénéficier de notre expertise et de nos services d'accompagnement."
-    else:
-        niveau = "Inconnu"
-        niveau_message = "Mode inconnu."
-    
-    # Afficher le pourcentage et le niveau
-    st.markdown(f"### 🔢 Votre Niveau de Compétence en IA: **{pourcentage:.1f}%**")
-    st.markdown(f"### **{niveau}**")
     
     # Création du graphique radar avec Plotly
     fig = go.Figure(data=go.Scatterpolar(
@@ -375,58 +116,35 @@ def display_results():
     ))
     
     fig.update_layout(
-        title="🌟 Votre Radar de Compétences en IA 🌟",
+        title="🌟 Votre Radar de Compétences en Prompting IA 🌟",
         polar=dict(
             radialaxis=dict(
                 visible=True,
-                range=[0, 3],
-                tickvals=[0, 1, 2, 3],
-                ticktext=["0", "1", "2", "3"]
+                range=[0, 3]
             ),
             angularaxis=dict(showline=True, linecolor="lightgrey")
         ),
-        showlegend=False,
-        template="plotly_dark"
+        showlegend=False
     )
     
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig)
     
-    # Message de niveau
+    # Calcul du pourcentage de connaissances
+    total_score = sum(values)
+    max_score = len(values) * 3
+    pourcentage = (total_score / max_score) * 100
+    
+    st.metric("🔢 Votre Niveau de Connaissance en IA", f"{pourcentage:.1f}%")
+    
+    # Félicitations et proposition de formation
     st.markdown(f"""
-        <div style='text-align: center; padding: 10px;'>
-            <b>{niveau_message}</b>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    # Proposition de formation avec lien
-    if mode == "Formation IA":
-        st.markdown(f"""
-            ---
-            🎓 **Continuez votre parcours !**
-            
-            Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Cela démontre une forte compatibilité avec nos formations avancées qui vous permettront de devenir un véritable **pro de l'IA**.
-            
-            👉 [Découvrez nos formations](https://insidegroup.fr/actualites/acculturation-ia/)
-        """)
-    elif mode == "Projet IA":
-        if pourcentage < 60:
-            st.markdown(f"""
-                ---
-                🛠️ **Préparez-vous pour votre Projet IA !**
-                
-                Il semble que vous ayez besoin de renforcer certaines compétences avant de vous lancer dans un projet IA. Nos formations sont conçues pour vous accompagner dans ce processus.
-                
-                👉 [Découvrez nos formations](https://insidegroup.fr/actualites/acculturation-ia/)
-            """)
-        else:
-            st.markdown(f"""
-                ---
-                ✅ **Lancez votre Projet IA !**
-                
-                Vous possédez les prérequis nécessaires pour démarrer un projet IA. Contactez-nous pour bénéficier de notre expertise et de nos services d'accompagnement.
-                
-                👉 [Contactez-nous](https://insidegroup.fr/actualites/acculturation-ia/)
-            """)
+        ---
+        🎓 **Félicitations !** 🎓
+        
+        Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Cela démontre une forte compatibilité avec nos formations avancées qui vous permettront de devenir un véritable **pro de l'IA**.
+        
+        👉 [Découvrez nos formations](https://votre-site.com/formations)
+    """)
     
     # Bouton pour recommencer l'évaluation
     st.markdown("<div class='button-container'>", unsafe_allow_html=True)
@@ -434,70 +152,16 @@ def display_results():
         reset_evaluation()
     st.markdown("</div>", unsafe_allow_html=True)
 
-def display_initial_selection():
-    """Afficher la sélection initiale avec deux cartes"""
-    st.markdown("## 📋 Choisissez votre objectif")
-    cols = st.columns(2)
-    
-    with cols[0]:
-        st.markdown("""
-            <div class="card">
-                <div class="card-title">🚀 Projet IA</div>
-                <div class="card-description">Évaluez vos prérequis pour lancer un projet en Intelligence Artificielle.</div>
-            </div>
-            """, unsafe_allow_html=True)
-        if st.button("Sélectionner Projet IA"):
-            st.session_state["mode"] = "Projet IA"
-            st.session_state["question_number"] = 1
-    
-    with cols[1]:
-        st.markdown("""
-            <div class="card">
-                <div class="card-title">🎓 Formation IA</div>
-                <div class="card-description">Évaluez votre compatibilité avec nos formations en Intelligence Artificielle.</div>
-            </div>
-            """, unsafe_allow_html=True)
-        if st.button("Sélectionner Formation IA"):
-            st.session_state["mode"] = "Formation IA"
-            st.session_state["question_number"] = 1
-
-def display_profile_selection():
-    """Afficher la sélection du profil pour Formation IA avec des cartes interactives"""
-    st.markdown("## 🎓 Sélectionnez votre profil")
-    cols = st.columns(2)
-    
-    with cols[0]:
-        st.markdown("""
-            <div class="card">
-                <div class="card-title">💻 Technique</div>
-                <div class="card-description">Profil avec des compétences techniques et/ou en programmation.</div>
-            </div>
-            """, unsafe_allow_html=True)
-        if st.button("Sélectionner Technique"):
-            st.session_state["profile"] = "Technique"
-            st.session_state["question_number"] += 1
-    
-    with cols[1]:
-        st.markdown("""
-            <div class="card">
-                <div class="card-title">🧑‍💼 Non Technique</div>
-                <div class="card-description">Profil sans compétences techniques avancées en programmation.</div>
-            </div>
-            """, unsafe_allow_html=True)
-        if st.button("Sélectionner Non Technique"):
-            st.session_state["profile"] = "Non Technique"
-            st.session_state["question_number"] += 1
-
-def main():
-    """Fonction principale pour gérer l'affichage"""
-    if not st.session_state["mode"]:
-        display_initial_selection()
-    elif st.session_state["mode"] == "Formation IA" and not st.session_state["profile"]:
-        display_profile_selection()
-    elif not st.session_state["show_results"]:
-        display_questions()
+# Affichage des questions ou des résultats selon l'état
+if st.session_state["show_results"] == False:
+    if st.session_state["question_number"] < len(questions):
+        current_question_num = st.session_state["question_number"] + 1
+        current_q = questions[st.session_state["question_number"]]
+        question_text, choices = current_q
+        display_question(question_text, choices, current_question_num)
     else:
-        display_results()
+        st.session_state["show_results"] = True
+        st.experimental_rerun()
 
-if __name__ == "__main__":
-    main()
+if st.session_state["show_results"]:
+    display_results()
