@@ -373,3 +373,4 @@ if not st.session_state["show_results"]:
 
 if st.session_state["show_results"]:
     display_results()
+
