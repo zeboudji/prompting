@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 
 # Configuration de la page
 st.set_page_config(
-    page_title="L'IA, c'est pour moi ?",
+    page_title="🚀 Niveau d'acculturation à l'IA",
     page_icon="🚀",
     layout="centered",
     initial_sidebar_state="collapsed",
@@ -205,7 +205,7 @@ questions = [
 ]
 
 def save_response(response, question_num):
-   """Sauvegarder la réponse et passer à la question suivante"""
+    """Sauvegarder la réponse et passer à la question suivante"""
     st.session_state["responses"][f"Question {question_num}"] = response
     st.session_state["question_number"] += 1
     # Vérification directe pour afficher les résultats si dernière question
