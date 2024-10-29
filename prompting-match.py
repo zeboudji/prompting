@@ -13,6 +13,8 @@ if "step" not in st.session_state:
 def next_question():
     """Fonction pour passer à la question suivante"""
     st.session_state["question_number"] += 1
+    if st.session_state["question_number"] > len(questions):
+        st.session_state["step"] = "results"
 
 def reset_evaluation():
     """Fonction pour recommencer l'évaluation"""
@@ -46,23 +48,21 @@ responses_scores = {
     "🚧 Peu structuré": 1, "📈 Parfois structuré": 2, "📊 Très structuré": 3
 }
 
-# Affichage des questions
-if st.session_state["step"] == "questions":
-    if st.session_state["question_number"] <= len(questions):
-        question_text, choices = questions[st.session_state["question_number"] - 1]
-        st.markdown(f"<div style='padding: 20px; background-color: #e3f2fd; border-radius: 10px; color: #0d47a1;'><b>{question_text}</b></div>", unsafe_allow_html=True)
-        
-        with st.form(key=f"question_form_{st.session_state['question_number']}"):
-            response = st.selectbox("Sélectionnez une réponse :", choices, key=f"response_{st.session_state['question_number']}")
-            submitted = st.form_submit_button("Suivant")
-            if submitted and response != "Sélectionnez une réponse":
-                st.session_state["responses"][f"Question {st.session_state['question_number']}"] = response
+# Fonction pour afficher une question
+def display_question(question_text, choices, question_num):
+    st.markdown(f"<div style='padding: 20px; background-color: #e3f2fd; border-radius: 10px; color: #0d47a1;'><b>{question_text}</b></div>", unsafe_allow_html=True)
+    with st.form(key=f"form_{question_num}"):
+        response = st.selectbox("Sélectionnez une réponse :", choices, key=f"response_{question_num}")
+        submitted = st.form_submit_button("Suivant")
+        if submitted:
+            if response != "Sélectionnez une réponse":
+                st.session_state["responses"][f"Question {question_num}"] = response
                 next_question()
-    else:
-        st.session_state["step"] = "results"
+            else:
+                st.error("Veuillez sélectionner une réponse valide.")
 
-# Affichage des résultats
-if st.session_state["step"] == "results":
+# Fonction pour afficher les résultats
+def display_results():
     # Calcul des scores pour le graphique radar
     competence_scores = {
         "Familiarité": responses_scores.get(st.session_state["responses"].get("Question 1", "🔰 Débutant(e)"), 1),
@@ -119,3 +119,15 @@ if st.session_state["step"] == "results":
     if st.button("🔄 Recommencer l'évaluation"):
         reset_evaluation()
 
+# Affichage des questions ou des résultats selon l'état
+if st.session_state["step"] == "questions":
+    current_question_num = st.session_state["question_number"]
+    if current_question_num <= len(questions):
+        question_text, choices = questions[current_question_num - 1]
+        display_question(question_text, choices, current_question_num)
+    else:
+        st.session_state["step"] = "results"
+        st.experimental_rerun()
+
+elif st.session_state["step"] == "results":
+    display_results()
