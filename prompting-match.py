@@ -3,8 +3,9 @@ import plotly.graph_objects as go
 
 # Configuration de la page
 st.set_page_config(
-    page_title="🚀L'IA, est ce pour moi ? ",
-      layout="centered",
+    page_title="L'IA, est ce pour moi ? ",
+    page_icon="🚀",
+    layout="centered",
     initial_sidebar_state="collapsed",
 )
 
