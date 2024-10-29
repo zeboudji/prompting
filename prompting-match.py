@@ -1,189 +1,206 @@
-# app.py
+import streamlit as st
+import pandas as pd
+import plotly.graph_objects as go
 import sqlite3
 from datetime import datetime
-import streamlit as st
 
-# Classe pour gérer les opérations sur la base de données
-class PromptManager:
-    def __init__(self, db_name="prompts.db"):
-        self.db_name = db_name
-        self.create_table()
+# Titre avec Emoji
+st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
 
-    def create_connection(self):
-        try:
-            conn = sqlite3.connect(self.db_name)
-            return conn
-        except sqlite3.Error as e:
-            st.error(f"Erreur de connexion à la base de données : {e}")
-            return None
+# Connexion à la base de données et création des tables si nécessaire
+def create_connection():
+    conn = sqlite3.connect("user_data.db")
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS profiles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT,
+            nom TEXT,
+            email TEXT,
+            poste TEXT,
+            secteur TEXT,
+            niveau_maturité TEXT,
+            connaissance_agile TEXT
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS responses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            date TEXT,
+            question TEXT,
+            response TEXT,
+            FOREIGN KEY(user_id) REFERENCES profiles(id)
+        )
+    ''')
+    conn.commit()
+    return conn
 
-    def create_table(self):
-        conn = self.create_connection()
-        if conn:
-            try:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS prompts (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        date TEXT,
-                        epic TEXT,
-                        user_story TEXT,
-                        task TEXT,
-                        business_rules TEXT,
-                        acceptance_criteria TEXT,
-                        response TEXT
-                    )
-                ''')
-                conn.commit()
-            except sqlite3.Error as e:
-                st.error(f"Erreur lors de la création de la table : {e}")
-            finally:
-                conn.close()
+# Fonction pour sauvegarder le profil utilisateur
+def save_profile(nom, email, poste, secteur, niveau_maturité, connaissance_agile):
+    conn = create_connection()
+    cursor = conn.cursor()
+    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute('''
+        INSERT INTO profiles (date, nom, email, poste, secteur, niveau_maturité, connaissance_agile)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ''', (date, nom, email, poste, secteur, niveau_maturité, connaissance_agile))
+    conn.commit()
+    user_id = cursor.lastrowid
+    conn.close()
+    return user_id
 
-    def save_prompt(self, prompt_data):
-        conn = self.create_connection()
-        if conn:
-            try:
-                cursor = conn.cursor()
-                date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                cursor.execute('''
-                    INSERT INTO prompts (date, epic, user_story, task, business_rules, acceptance_criteria, response)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    date,
-                    prompt_data.get('epic'),
-                    prompt_data.get('user_story'),
-                    prompt_data.get('task'),
-                    prompt_data.get('business_rules'),
-                    prompt_data.get('acceptance_criteria'),
-                    prompt_data.get('response')
-                ))
-                conn.commit()
-                st.success("Le prompt a été sauvegardé avec succès.")
-                return True
-            except sqlite3.Error as e:
-                st.error(f"Erreur lors de la sauvegarde du prompt : {e}")
-                return False
-            finally:
-                conn.close()
+# Fonction pour sauvegarder les réponses
+def save_responses(user_id, responses):
+    conn = create_connection()
+    cursor = conn.cursor()
+    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    for question, response in responses.items():
+        cursor.execute('''
+            INSERT INTO responses (user_id, date, question, response)
+            VALUES (?, ?, ?, ?)
+        ''', (user_id, date, question, response))
+    conn.commit()
+    conn.close()
 
-    def list_prompts(self):
-        conn = self.create_connection()
-        prompts = []
-        if conn:
-            try:
-                cursor = conn.cursor()
-                cursor.execute('SELECT id, date, epic FROM prompts')
-                prompts = cursor.fetchall()
-            except sqlite3.Error as e:
-                st.error(f"Erreur lors de la récupération des prompts : {e}")
-            finally:
-                conn.close()
-        return prompts
+# Initialisation de l'état de session
+if "step" not in st.session_state:
+    st.session_state["step"] = "profil"
 
-    def view_prompt(self, prompt_id):
-        conn = self.create_connection()
-        prompt = None
-        if conn:
-            try:
-                cursor = conn.cursor()
-                cursor.execute('SELECT * FROM prompts WHERE id = ?', (prompt_id,))
-                prompt = cursor.fetchone()
-            except sqlite3.Error as e:
-                st.error(f"Erreur lors de la récupération du prompt : {e}")
-            finally:
-                conn.close()
-        return prompt
-
-# Classe pour gérer l'interface Streamlit
-class PromptApp:
-    def __init__(self):
-        self.manager = PromptManager()
-
-    def run(self):
-        st.set_page_config(page_title="Gestionnaire de Prompts IA", layout="wide")
-        st.title("Gestionnaire de Prompts IA")
-
-        menu = ["Créer Prompt", "Lister Prompts", "Voir Prompt"]
-        choice = st.sidebar.selectbox("Menu", menu)
-
-        if choice == "Créer Prompt":
-            self.create_prompt()
-        elif choice == "Lister Prompts":
-            self.list_prompts()
-        elif choice == "Voir Prompt":
-            self.view_prompt()
-
-    def create_prompt(self):
-        st.header("Créer un Nouveau Prompt")
-        with st.form("prompt_form"):
-            epic = st.text_input("Epic (Objectif général)")
-            user_story = st.text_input("User Story (Point de vue/Rôle)")
-            task = st.text_input("Task (Détails spécifiques)")
-            business_rules = st.text_area("Business Rules (Règles de gestion)")
-            acceptance_criteria = st.text_area("Acceptance Criteria (Critères de réussite)")
-            response = st.text_area("Response (Réponse de l'IA)")
-            submitted = st.form_submit_button("Sauvegarder Prompt")
-
-            if submitted:
-                prompt_data = {
-                    'epic': epic,
-                    'user_story': user_story,
-                    'task': task,
-                    'business_rules': business_rules,
-                    'acceptance_criteria': acceptance_criteria,
-                    'response': response
-                }
-
-                # Vérifier que tous les champs sont remplis
-                if all(prompt_data.values()):
-                    success = self.manager.save_prompt(prompt_data)
-                    if success:
-                        st.experimental_rerun()
-                else:
-                    st.warning("Veuillez remplir tous les champs.")
-
-    def list_prompts(self):
-        st.header("Liste des Prompts")
-        prompts = self.manager.list_prompts()
-        if prompts:
-            df = self.convert_to_dataframe(prompts)
-            st.dataframe(df)
+# Formulaire de profil utilisateur
+if st.session_state["step"] == "profil":
+    st.header("🔍 Informations sur votre profil")
+    with st.form("profil_form"):
+        nom = st.text_input("Nom complet")
+        email = st.text_input("Email")
+        poste = st.text_input("Votre poste actuel")
+        secteur = st.text_input("Secteur d'activité")
+        niveau_maturité = st.selectbox(
+            "Niveau de maturité en IA",
+            ["Sélectionnez une option", "Débutant", "Intermédiaire", "Avancé"]
+        )
+        connaissance_agile = st.selectbox(
+            "Connaissance des méthodes Agiles",
+            ["Sélectionnez une option", "Oui", "Non"]
+        )
+        submitted = st.form_submit_button("Commencer l'évaluation")
+    
+    if submitted:
+        if nom and email and poste and secteur and niveau_maturité != "Sélectionnez une option" and connaissance_agile != "Sélectionnez une option":
+            user_id = save_profile(nom, email, poste, secteur, niveau_maturité, connaissance_agile)
+            st.session_state["user_id"] = user_id
+            st.session_state["step"] = "questions"
         else:
-            st.info("Aucun prompt trouvé.")
+            st.error("Veuillez remplir tous les champs requis.")
 
-    def view_prompt(self):
-        st.header("Voir les Détails d'un Prompt")
-        prompt_id = st.text_input("Entrez l'ID du Prompt")
-        if st.button("Voir Détails"):
-            if prompt_id.isdigit():
-                prompt = self.manager.view_prompt(int(prompt_id))
-                if prompt:
-                    st.subheader(f"Prompt ID {prompt[0]}")
-                    st.write(f"**Date :** {prompt[1]}")
-                    st.write(f"**Epic :** {prompt[2]}")
-                    st.write(f"**User Story :** {prompt[3]}")
-                    st.write(f"**Task :** {prompt[4]}")
-                    st.write("**Business Rules :**")
-                    st.write(prompt[5])
-                    st.write("**Acceptance Criteria :**")
-                    st.write(prompt[6])
-                    st.write("**Response :**")
-                    st.write(prompt[7])
-                else:
-                    st.error("Prompt non trouvé.")
-            else:
-                st.warning("Veuillez entrer un ID valide.")
-
-    def convert_to_dataframe(self, prompts):
-        import pandas as pd
-        df = pd.DataFrame(prompts, columns=["ID", "Date", "Epic"])
-        return df
-
-# Fonction principale pour lancer l'application
-def main():
-    app = PromptApp()
-    app.run()
-
-if __name__ == "__main__":
-    main()
+# Questions d'évaluation
+elif st.session_state["step"] == "questions":
+    # Initialisation de la progression des questions
+    if "question_number" not in st.session_state:
+        st.session_state["question_number"] = 1
+        st.session_state["responses"] = {}
+    
+    def next_question():
+        """ Fonction pour passer à la question suivante """
+        st.session_state["question_number"] += 1
+    
+    # Définition des questions avec emojis et options
+    questions = [
+        ("🌱 **Quel est votre niveau de familiarité avec l’écriture de prompts pour l’IA ?**",
+         ["Sélectionnez une réponse", "🔰 Débutant(e)", "📘 Intermédiaire", "🌟 Avancé(e)"]),
+        ("🧩 **Utilisez-vous déjà des techniques d’expression de besoin comme les User Stories ou les Epics ?**",
+         ["Sélectionnez une réponse", "✅ Oui", "📙 Non, mais curieux(se) d’en apprendre plus", "❓ Pas familier(e) avec ces termes"]),
+        ("🔍 **Comment définiriez-vous votre capacité à exprimer des besoins clairs et spécifiques pour une tâche ?**",
+         ["Sélectionnez une réponse", "📝 Très clair et structuré", "📄 Clair, mais manque parfois de détails", "⚠️ Besoin d’amélioration"]),
+        ("📐 **Savez-vous diviser une tâche en plusieurs étapes pour aider l’IA à répondre plus précisément ?**",
+         ["Sélectionnez une réponse", "✔️ Oui, j’utilise cette approche régulièrement", "🔄 J’ai quelques idées, mais je pourrais m’améliorer", "❌ Non, je ne suis pas sûr(e) de comment faire"]),
+        ("🎯 **Comment évalueriez-vous votre capacité à adapter le ton du prompt au contexte ?**",
+         ["Sélectionnez une réponse", "🗣 Très adaptable", "😊 Souvent adaptable", "🛑 Peu adaptable"]),
+        ("🎯 **Comment évalueriez-vous votre capacité à structurer les réponses pour obtenir des informations claires et organisées ?**",
+         ["Sélectionnez une réponse", "📊 Très structuré", "📈 Parfois structuré", "🚧 Peu structuré"])
+    ]
+    
+    # Récupération du profil utilisateur
+    user_id = st.session_state["user_id"]
+    
+    # Affichage de la question courante
+    if st.session_state["question_number"] <= len(questions):
+        question_text, choices = questions[st.session_state["question_number"] - 1]
+        st.markdown(f"<div style='padding: 20px; background-color: #e3f2fd; border-radius: 10px; color: #0d47a1;'><b>{question_text}</b></div>", unsafe_allow_html=True)
+        response = st.selectbox("Sélectionnez une réponse :", choices, key=f"question_{st.session_state['question_number']}")
+        
+        # Affichage du bouton pour passer à la question suivante
+        if response != "Sélectionnez une réponse":
+            if st.button("Suivant"):
+                st.session_state["responses"][f"Question {st.session_state['question_number']}"] = response
+                next_question()
+    else:
+        # Sauvegarde des réponses dans la base de données
+        save_responses(user_id, st.session_state["responses"])
+        
+        # Calcul des scores pour le graphique radar
+        responses_scores = {
+            "🔰 Débutant(e)": 1, "📘 Intermédiaire": 2, "🌟 Avancé(e)": 3,
+            "❓ Pas familier(e) avec ces termes": 1, "📙 Non, mais curieux(se) d’en apprendre plus": 2, "✅ Oui": 3,
+            "⚠️ Besoin d’amélioration": 1, "📄 Clair, mais manque parfois de détails": 2, "📝 Très clair et structuré": 3,
+            "❌ Non, je ne suis pas sûr(e) de comment faire": 1, "🔄 J’ai quelques idées, mais je pourrais m’améliorer": 2, "✔️ Oui, j’utilise cette approche régulièrement": 3,
+            "🛑 Peu adaptable": 1, "😊 Souvent adaptable": 2, "🗣 Très adaptable": 3,
+            "🚧 Peu structuré": 1, "📈 Parfois structuré": 2, "📊 Très structuré": 3
+        }
+        
+        competence_scores = {
+            "Familiarité": responses_scores.get(st.session_state["responses"].get("Question 1", "🔰 Débutant(e)"), 1),
+            "Expérience Agile": responses_scores.get(st.session_state["responses"].get("Question 2", "❓ Pas familier(e) avec ces termes"), 1),
+            "Clarté": responses_scores.get(st.session_state["responses"].get("Question 3", "⚠️ Besoin d’amélioration"), 1),
+            "Diviser une Tâche": responses_scores.get(st.session_state["responses"].get("Question 4", "❌ Non, je ne suis pas sûr(e) de comment faire"), 1),
+            "Adaptabilité du Ton": responses_scores.get(st.session_state["responses"].get("Question 5", "🛑 Peu adaptable"), 1),
+            "Structure des Réponses": responses_scores.get(st.session_state["responses"].get("Question 6", "🚧 Peu structuré"), 1)
+        }
+        
+        categories = list(competence_scores.keys())
+        values = list(competence_scores.values())
+        
+        # Création du graphique radar avec Plotly
+        fig = go.Figure(data=go.Scatterpolar(
+            r=values,
+            theta=categories,
+            fill='toself',
+            marker=dict(color='rgba(56, 128, 255, 0.6)')
+        ))
+        
+        fig.update_layout(
+            title="🌟 Votre Radar de Compétences en Prompting IA 🌟",
+            polar=dict(
+                radialaxis=dict(
+                    visible=True,
+                    range=[0, 3]
+                ),
+                angularaxis=dict(showline=True, linecolor="lightgrey")
+            ),
+            showlegend=False
+        )
+        
+        st.plotly_chart(fig)
+        
+        # Calcul du pourcentage de connaissances
+        total_score = sum(values)
+        max_score = len(values) * 3
+        pourcentage = (total_score / max_score) * 100
+        
+        st.metric("🔢 Votre Niveau de Connaissance en IA", f"{pourcentage:.1f}%")
+        
+        # Proposition de formation
+        st.markdown("""
+            ---
+            🎓 **Prolongez votre apprentissage !**
+            
+            Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Pour perfectionner vos connaissances et pratiques en IA et en prompting, découvrez nos **formations personnalisées** adaptées à votre niveau.
+            
+            👉 [Découvrez nos formations](#)
+        """.format(pourcentage=pourcentage))
+        
+        # Bouton pour recommencer l'évaluation
+        if st.button("🔄 Recommencer l'évaluation"):
+            st.session_state["step"] = "profil"
+            st.session_state["question_number"] = 1
+            st.session_state["responses"] = {}
