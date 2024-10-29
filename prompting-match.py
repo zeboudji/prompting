@@ -194,18 +194,6 @@ questions = [
     }
 ]
 
-# Mapping des réponses à un score numérique pour le graphique radar
-responses_scores = {
-    "🔰 Jamais": 1, "📘 Occasionnellement": 2, "🌟 Régulièrement": 3,
-    "🔰 Rarement": 1, "📘 Parfois": 2, "🌟 Fréquemment": 3,
-    "🔰 Pas du tout": 1, "📘 Un peu": 2, "🌟 Oui, je l'applique régulièrement": 3,
-    "🔰 Jamais": 1, "📘 Parfois": 2, "🌟 Fréquemment": 3,
-    "🔰 Pas du tout": 1, "📘 Peut-être": 2, "🌟 Absolument": 3,
-    "🔰 Peu adaptable": 1, "📘 Moyennement adaptable": 2, "🌟 Très adaptable": 3,
-    "🔰 Peu structuré": 1, "📘 Moyennement structuré": 2, "🌟 Très structuré": 3,
-    "🔰 Jamais": 1, "📘 Parfois": 2, "🌟 Fréquemment": 3
-}
-
 def save_response(response, question_num):
     """Sauvegarder la réponse et passer à la question suivante"""
     st.session_state["responses"][f"Question {question_num}"] = response
@@ -255,8 +243,12 @@ def display_results():
     # Calcul des scores pour le graphique radar
     competence_scores = {}
     for idx, q in enumerate(questions, 1):
-        response = st.session_state["responses"].get(f"Question {idx}", "🔰 Jamais")
-        score = responses_scores.get(response, 1)
+        response = st.session_state["responses"].get(f"Question {idx}", "Sélectionnez une réponse")
+        if response == "Sélectionnez une réponse":
+            score = 0  # Vous pouvez ajuster cette valeur selon votre logique
+        else:
+            # Calculer le score basé sur l'index de la réponse
+            score = q["choices"].index(response)  # 1, 2, 3
         theme = q["theme"]
         competence_scores[theme] = score
 
@@ -266,7 +258,7 @@ def display_results():
     # Calcul du pourcentage de compatibilité
     total_score = sum(values)
     max_score = len(values) * 3
-    pourcentage = (total_score / max_score) * 100
+    pourcentage = (total_score / max_score) * 100 if max_score > 0 else 0
 
     # Détermination du niveau basé sur le pourcentage avec messages motivants par tranche de 10%
     if pourcentage <= 10:
@@ -300,6 +292,29 @@ def display_results():
         niveau = "🌟 Légende de l'IA"
         motivation_message = "Vous êtes une véritable légende de l'IA. Félicitations pour votre expertise inégalée et votre capacité à intégrer l'IA dans votre métier !"
 
+    # Création du graphique radar avec Plotly
+    fig = go.Figure(data=go.Scatterpolar(
+        r=values,
+        theta=categories,
+        fill='toself',
+        marker=dict(color='rgba(56, 128, 255, 0.6)')
+    ))
+
+    fig.update_layout(
+        title="🌟 Votre Radar de Compatibilité avec l'IA 🌟",
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 3],
+                tickvals=[0, 1, 2, 3],
+                ticktext=["0", "1", "2", "3"]
+            ),
+            angularaxis=dict(showline=True, linecolor="lightgrey")
+        ),
+        showlegend=False,
+        template="plotly_dark"
+    )
+
     # Création du contenu HTML complet pour la page des résultats
     html_content = f"""
     <div class='result-container'>
@@ -309,11 +324,10 @@ def display_results():
         <h3>**{niveau}**</h3>
         <br>
         <div>
-            <img src='https://i.imgur.com/your_image_link.png' alt='Radar de Compatibilité' style='width:100%; max-width:600px; margin: auto;'/>
-            <p><i>Votre Radar de Compatibilité avec l'IA</i></p>
+            <!-- Le graphique radar sera inséré ici -->
         </div>
         <br>
-        <p><b>{motivation_message}</b></p>
+        <p class='motivation-message'><b>{motivation_message}</b></p>
         <hr>
         <h3>🎓 Continuez votre parcours !</h3>
         <p>Avec un score de **{pourcentage:.1f}%**, vous disposez déjà de nombreux prérequis pour intégrer l'IA dans votre quotidien. Nos formations avancées vous aideront à exploiter pleinement le potentiel de l'intelligence artificielle dans votre métier.</p>
@@ -339,6 +353,9 @@ def display_results():
 
     # Afficher le contenu HTML de la page des résultats
     st.markdown(html_content, unsafe_allow_html=True)
+
+    # Afficher le graphique radar
+    st.plotly_chart(fig, use_container_width=True)
 
 # Fonction pour afficher les questions
 def display_questions():
