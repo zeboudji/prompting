@@ -79,3 +79,142 @@ questions = [
         "theme": "Identification des Besoins",
         "question": "📋 **Est-ce que vous avez l'habitude de récolter les besoins de vos clients ou de vos collègues pour définir des projets ?**",
         "choices": ["Sélectionnez une réponse", "🔰 Jamais", "📚 Occasionnellement", "🌟 Régulièrement"]
+    },
+    {
+        "theme": "Connaissance de l'Agilité",
+        "question": "⚡ **Le concept d'agilité en gestion de projet vous est-il familier ?**",
+        "choices": ["Sélectionnez une réponse", "🔰 Pas du tout", "📚 Un peu", "🌟 Oui, je l'applique régulièrement"]
+    },
+    {
+        "theme": "Utilisation des Outils IA",
+        "question": "🤖 **Utilisez-vous des outils d'intelligence artificielle (IA) pour améliorer votre efficacité au travail ?**",
+        "choices": ["Sélectionnez une réponse", "🔰 Jamais", "📚 Parfois", "🌟 Fréquemment"]
+    },
+    {
+        "theme": "Rédaction de Prompts",
+        "question": "📝 **Avez-vous déjà rédigé des prompts pour interagir avec des outils d'IA comme ChatGPT ?**",
+        "choices": ["Sélectionnez une réponse", "🔰 Jamais", "📚 Rarement", "🌟 Souvent"]
+    },
+    {
+        "theme": "Structuration des Informations",
+        "question": "📊 **Comment évaluez-vous votre capacité à organiser les informations fournies par un outil d'IA dans vos rapports ou présentations ?**",
+        "choices": ["Sélectionnez une réponse", "🔰 Peu structuré", "📚 Moyennement structuré", "🌟 Très structuré"]
+    }
+]
+
+def save_response(response, question_num):
+    """Sauvegarder la réponse et passer à la question suivante"""
+    st.session_state["responses"][f"Question {question_num}"] = response
+    st.session_state["question_number"] += 1
+    # Vérification directe pour afficher les résultats si dernière question
+    if st.session_state["question_number"] >= len(questions):
+        st.session_state["show_results"] = True
+
+# Fonction pour afficher une question sous forme d'accordéon
+def display_question_accordion():
+    for idx, question_data in enumerate(questions):
+        with st.expander(f"{question_data['theme']}"):  # Création d'un accordéon pour chaque question
+            question_text = question_data["question"]
+            choices = question_data["choices"]
+            selected = st.radio(question_text, choices, key=f"response_{idx}")
+            if st.button("Valider", key=f"submit_{idx}"):
+                if selected != "Sélectionnez une réponse":
+                    save_response(selected, idx)
+                else:
+                    st.warning("Veuillez sélectionner une réponse valide avant de continuer.")
+
+# Fonction pour réinitialiser l'évaluation
+def reset_evaluation():
+    st.session_state["responses"] = {}
+    st.session_state["question_number"] = 0
+    st.session_state["show_results"] = False
+    st.experimental_rerun()
+
+# Fonction pour afficher les résultats
+def display_results():
+    # Calcul des scores pour le graphique radar
+    competence_scores = {}
+    for idx, q in enumerate(questions, 1):
+        response = st.session_state["responses"].get(f"Question {idx}", "Sélectionnez une réponse")
+        try:
+            score = q["choices"].index(response)
+        except ValueError:
+            score = 0
+        competence_scores[q["theme"]] = score
+
+    categories = list(competence_scores.keys())
+    values = list(competence_scores.values())
+
+    # Ajout d'une valeur égale à la première pour fermer le radar
+    values += values[:1]
+    categories += categories[:1]
+
+    # Calcul du pourcentage de compatibilité
+    total_score = sum(values[:-1])
+    max_score = (len(values) - 1) * 3
+    pourcentage = (total_score / max_score) * 100 if max_score > 0 else 0
+
+    # Détermination du niveau basé sur le pourcentage
+    if pourcentage < 60:
+        niveau = "🎓 Sensibilisation à l'IA"
+        niveau_message = "Vous êtes éligible à la **Sensibilisation** pour mieux comprendre les fondamentaux de l'IA. Toutes les conditions sont réunies !"
+        recommandation = "Nous vous recommandons de suivre notre formation de sensibilisation pour approfondir vos connaissances sur l'intelligence artificielle."
+    else:
+        niveau = "🚀 Acculturation pour devenir un AS de l'IA"
+        niveau_message = "Félicitations ! Vous êtes éligible à l'**Acculturation** pour devenir un **AS de l'IA**. Toutes les conditions sont réunies !"
+        recommandation = "Nous vous invitons à rejoindre notre programme d'acculturation avancée pour maîtriser pleinement les outils et concepts de l'intelligence artificielle."
+
+    # Création du graphique radar avec Plotly
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatterpolar(
+        r=values,
+        theta=categories,
+        fill='toself',
+        name='Compétences',
+        marker=dict(color='rgba(56, 128, 255, 0.6)')
+    ))
+
+    fig.update_layout(
+        title="🌟 Votre Radar de Compétences en IA 🌟",
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 3],
+                tickvals=[0, 1, 2, 3],
+                ticktext=["0", "1", "2", "3"]
+            ),
+            angularaxis=dict(showline=True, linecolor="lightgrey")
+        ),
+        showlegend=False,
+        template="plotly_dark",
+        margin=dict(l=50, r=50, t=50, b=50)
+    )
+
+    # Niveau d'acculturation
+    st.markdown(f"### 🔢 Votre Niveau d'Acculturation à l'IA: **{pourcentage:.1f}%**", unsafe_allow_html=True)
+    st.markdown(f"### **{niveau}**", unsafe_allow_html=True)
+
+    # Afficher le graphique radar
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Message de niveau
+    st.markdown(f"<div class='motivation-message'><b>{niveau_message}</b></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='motivation-message'>{recommandation}</div>", unsafe_allow_html=True)
+
+    # Proposition de formation avec lien
+    st.markdown("""
+        ---
+        🎓 **Continuez votre parcours !**
+        👉 [Découvrez nos formations](https://insidegroup.fr/actualites/acculturation-ia/)
+    """, unsafe_allow_html=True)
+
+    # Bouton pour recommencer l'évaluation
+    if st.button("🔄 Recommencer l'évaluation"):
+        reset_evaluation()
+
+# Affichage des questions ou des résultats selon l'état
+if not st.session_state["show_results"]:
+    display_question_accordion()
+else:
+    display_results()
