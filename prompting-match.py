@@ -44,9 +44,40 @@ st.markdown("""
     }
     /* Style pour le bouton "Découvrez nos formations" en haut à droite */
     .top-right-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+    /* Style pour la barre de progression avec fil d'Ariane */
+    .breadcrumb {
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+    .breadcrumb li {
+        flex: 1;
+        text-align: center;
+        position: relative;
+    }
+    .breadcrumb li::after {
+        content: '';
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: 50%;
+        right: -50%;
+        width: 100%;
+        height: 2px;
+        background-color: #4CAF50;
+        z-index: -1;
+    }
+    .breadcrumb li:last-child::after {
+        content: none;
+    }
+    .breadcrumb .active {
+        font-weight: bold;
+        color: #4CAF50;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -112,11 +143,19 @@ def save_response(response, question_num):
     st.session_state["responses"][f"Question {question_num}"] = response
     st.session_state["question_number"] += 1
 
-# Fonction pour afficher une question
+# Fonction pour afficher une question avec fil d'Ariane
 def display_question(question_text, choices, question_num):
-    # Calcul du pourcentage d'avancement
-    progress = int((question_num / len(questions)) * 100)
-    st.progress(progress)
+    # Création du fil d'Ariane
+    breadcrumb = '<ul class="breadcrumb">'
+    for i in range(1, len(questions)+1):
+        if i < question_num:
+            breadcrumb += f'<li><span class="active">Étape {i}</span></li>'
+        elif i == question_num:
+            breadcrumb += f'<li><span class="active">Étape {i}</span></li>'
+        else:
+            breadcrumb += f'<li>Étape {i}</li>'
+    breadcrumb += '</ul>'
+    st.markdown(breadcrumb, unsafe_allow_html=True)
     
     st.markdown(f"<div class='question-container'><b>{question_text}</b></div>", unsafe_allow_html=True)
     
@@ -156,10 +195,10 @@ def display_results():
     # Détermination du niveau basé sur le pourcentage
     if pourcentage < 60:
         niveau = "🎓 Sensibilisation à l'IA"
-        niveau_message = "Vous êtes éligible à la **Sensibilisation** pour mieux comprendre les fondamentaux de l'IA."
+        niveau_message = "Vous êtes éligible à la **Sensibilisation** pour mieux comprendre les fondamentaux de l'IA. Toutes les conditions sont réunies !"
     else:
         niveau = "🚀 Acculturation pour devenir un AS de l'IA"
-        niveau_message = "Félicitations ! Vous êtes éligible à l'**Acculturation** pour devenir un **AS de l'IA**."
+        niveau_message = "Félicitations ! Vous êtes éligible à l'**Acculturation** pour devenir un **AS de l'IA**. Toutes les conditions sont réunies !"
     
     # Afficher le pourcentage et le niveau
     st.markdown(f"### 🔢 Votre Niveau de Connaissance en IA: **{pourcentage:.1f}%**")
