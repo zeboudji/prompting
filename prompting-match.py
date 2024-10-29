@@ -165,7 +165,7 @@ def display_results():
         recommandation = "Nous vous recommandons de suivre notre formation de sensibilisation pour approfondir vos connaissances sur l'intelligence artificielle."
     else:
         niveau = "Vous avez besoin d'une acculturation pour exploiter pleinement le potentiel de l'IA 🚀"
-        niveau_message = "Dans vos habitudes vous disposez déjà de tous les prérequis pour devenir un **AS de l'IA**. Toutes les conditions sont réunies !"
+        niveau_message = "Vous disposez déjà d'un certain nombre deprérequis pour devenir un **AS de l'IA** !"
         recommandation = "Nous vous invitons à consulter notre programme d'acculturation avancée pour maîtriser pleinement les outils et concepts de l'intelligence artificielle."
 
     # Création du graphique radar avec Plotly
