@@ -12,21 +12,35 @@ st.set_page_config(
 # Styles personnalisés
 st.markdown("""
     <style>
+    /* Style général de la page */
+    .main {
+        background-color: #121212;
+        color: #ffffff;
+    }
+    /* Style pour les conteneurs de questions */
     .question-container {
         padding: 20px;
-        background-color: #f0f8ff;
+        background-color: #1e1e1e;
         border-radius: 10px;
         margin-bottom: 20px;
+        color: #ffffff;
     }
+    /* Style pour le conteneur des résultats */
     .result-container {
         padding: 20px;
-        background-color: #e6ffe6;
+        background-color: #2e7d32;
         border-radius: 10px;
         text-align: center;
+        color: #ffffff;
     }
+    /* Style pour les boutons */
     .button-container {
         text-align: center;
         margin-top: 20px;
+    }
+    /* Style pour les textes d'erreur */
+    .error-message {
+        color: #ff1744;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -36,16 +50,6 @@ st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
 
 # Initialisation de l'état de session
 if "responses" not in st.session_state:
-    st.session_state["responses"] = {}
-    st.session_state["question_number"] = 0
-    st.session_state["show_results"] = False
-
-def next_question():
-    """Fonction pour passer à la question suivante"""
-    st.session_state["question_number"] += 1
-
-def reset_evaluation():
-    """Fonction pour recommencer l'évaluation"""
     st.session_state["responses"] = {}
     st.session_state["question_number"] = 0
     st.session_state["show_results"] = False
@@ -76,18 +80,25 @@ responses_scores = {
     "🚧 Peu structuré": 1, "📈 Parfois structuré": 2, "📊 Très structuré": 3
 }
 
+def save_response(response, question_num):
+    """Sauvegarder la réponse et passer à la question suivante"""
+    st.session_state["responses"][f"Question {question_num}"] = response
+    st.session_state["question_number"] += 1
+    if st.session_state["question_number"] >= len(questions):
+        st.session_state["show_results"] = True
+
 # Fonction pour afficher une question
 def display_question(question_text, choices, question_num):
     st.markdown(f"<div class='question-container'><b>{question_text}</b></div>", unsafe_allow_html=True)
-    with st.form(key=f"form_{question_num}"):
-        response = st.radio("Sélectionnez une réponse :", choices, key=f"response_{question_num}")
-        submitted = st.form_submit_button("Suivant")
-        if submitted:
-            if response != "Sélectionnez une réponse":
-                st.session_state["responses"][f"Question {question_num}"] = response
-                next_question()
-            else:
-                st.error("Veuillez sélectionner une réponse valide.")
+    
+    def on_change():
+        selected = st.session_state[f"response_{question_num}"]
+        if selected != "Sélectionnez une réponse":
+            save_response(selected, question_num)
+    
+    selected = st.radio("Sélectionnez une réponse :", choices, key=f"response_{question_num}", on_change=on_change)
+    if selected == "Sélectionnez une réponse":
+        st.markdown("<span class='error-message'>Veuillez sélectionner une réponse valide.</span>", unsafe_allow_html=True)
 
 # Fonction pour afficher les résultats
 def display_results():
@@ -107,6 +118,14 @@ def display_results():
     categories = list(competence_scores.keys())
     values = list(competence_scores.values())
     
+    # Calcul du pourcentage de connaissances
+    total_score = sum(values)
+    max_score = len(values) * 3
+    pourcentage = (total_score / max_score) * 100
+    
+    # Afficher le pourcentage au-dessus du radar
+    st.markdown(f"### 🔢 Votre Niveau de Connaissance en IA: **{pourcentage:.1f}%**")
+    
     # Création du graphique radar avec Plotly
     fig = go.Figure(data=go.Scatterpolar(
         r=values,
@@ -120,23 +139,19 @@ def display_results():
         polar=dict(
             radialaxis=dict(
                 visible=True,
-                range=[0, 3]
+                range=[0, 3],
+                tickvals=[0, 1, 2, 3],
+                ticktext=["0", "1", "2", "3"]
             ),
             angularaxis=dict(showline=True, linecolor="lightgrey")
         ),
-        showlegend=False
+        showlegend=False,
+        template="plotly_dark"
     )
     
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)
     
-    # Calcul du pourcentage de connaissances
-    total_score = sum(values)
-    max_score = len(values) * 3
-    pourcentage = (total_score / max_score) * 100
-    
-    st.metric("🔢 Votre Niveau de Connaissance en IA", f"{pourcentage:.1f}%")
-    
-    # Félicitations et proposition de formation
+    # Proposition de formation
     st.markdown(f"""
         ---
         🎓 **Félicitations !** 🎓
@@ -152,8 +167,15 @@ def display_results():
         reset_evaluation()
     st.markdown("</div>", unsafe_allow_html=True)
 
+# Fonction pour réinitialiser l'évaluation
+def reset_evaluation():
+    st.session_state["responses"] = {}
+    st.session_state["question_number"] = 0
+    st.session_state["show_results"] = False
+    st.experimental_rerun()
+
 # Affichage des questions ou des résultats selon l'état
-if st.session_state["show_results"] == False:
+if not st.session_state["show_results"]:
     if st.session_state["question_number"] < len(questions):
         current_question_num = st.session_state["question_number"] + 1
         current_q = questions[st.session_state["question_number"]]
