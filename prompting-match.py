@@ -42,15 +42,18 @@ st.markdown("""
     .error-message {
         color: #ff1744;
     }
+    /* Style pour le bouton "Découvrez nos formations" en haut à droite */
+    .top-right-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# Titre principal et bouton en haut
-col1, col2 = st.columns([3, 1])
-with col1:
-    st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
-with col2:
-    st.markdown("""
+# Bouton "Découvrez nos formations" en haut à droite
+st.markdown("""
+    <div class="top-right-button">
         <a href="https://insidegroup.fr/actualites/acculturation-ia/" target="_blank">
             <button style="
                 background-color: #4CAF50; 
@@ -61,11 +64,16 @@ with col2:
                 display: inline-block; 
                 font-size: 16px; 
                 border: none; 
-                border-radius: 5px;">
+                border-radius: 5px;
+                cursor: pointer;">
                 📚 Découvrez nos formations
             </button>
         </a>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
+
+# Titre principal
+st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
 
 # Initialisation de l'état de session
 if "responses" not in st.session_state:
@@ -107,7 +115,7 @@ def save_response(response, question_num):
 # Fonction pour afficher une question
 def display_question(question_text, choices, question_num):
     # Calcul du pourcentage d'avancement
-    progress = (question_num / len(questions)) * 100
+    progress = int((question_num / len(questions)) * 100)
     st.progress(progress)
     
     st.markdown(f"<div class='question-container'><b>{question_text}</b></div>", unsafe_allow_html=True)
