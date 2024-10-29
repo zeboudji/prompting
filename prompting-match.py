@@ -17,43 +17,16 @@ st.markdown("""
         background-color: #121212;
         color: #ffffff;
     }
-    /* Style pour les conteneurs de questions */
-    .question-container {
+    /* Style pour les conteneurs de questions et résultats */
+    .container {
         padding: 20px;
         background-color: #1e1e1e;
         border-radius: 10px;
         margin-bottom: 20px;
         color: #ffffff;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
-    /* Style pour le conteneur des résultats */
-    .result-container {
-        padding: 40px;
-        background-color: #2c2c2c;
-        border-radius: 15px;
-        text-align: center;
-        color: #ffffff;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.5);
-        max-width: 800px;
-        margin: auto;
-    }
-    /* Style pour les boutons */
-    .button-container {
-        text-align: center;
-        margin-top: 30px;
-    }
-    /* Style pour les textes d'erreur */
-    .error-message {
-        color: #ff1744;
-        font-size: 0.9em;
-    }
-    /* Style pour le bouton "Découvrez nos formations" en haut à droite */
-    .top-right-button {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-    }
-    /* Style pour la barre de progression avec fil d'Ariane */
+    /* Style pour le fil d'Ariane */
     .breadcrumb {
         list-style: none;
         display: flex;
@@ -100,6 +73,30 @@ st.markdown("""
         font-size: 2em;
         margin-top: 10px;
     }
+    /* Style pour le bouton "Découvrez nos formations" en haut à droite */
+    .top-right-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+    /* Style pour les boutons */
+    .button-container button {
+        background-color: #f44336; 
+        color: white; 
+        padding: 10px 20px; 
+        text-align: center; 
+        text-decoration: none; 
+        display: inline-block; 
+        font-size: 16px; 
+        border: none; 
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .button-container button:hover {
+        background-color: #d32f2f;
+    }
     /* Responsive adjustments */
     @media (max-width: 600px) {
         .breadcrumb {
@@ -143,12 +140,14 @@ st.markdown("""
 st.markdown("# 🚀 Niveau d'acculturation à l'IA")
 
 # Initialisation de l'état de session avec setdefault pour éviter KeyError
-if 'responses' not in st.session_state:
-    st.session_state['responses'] = {}
-if 'question_number' not in st.session_state:
-    st.session_state['question_number'] = 0
-if 'show_results' not in st.session_state:
-    st.session_state['show_results'] = False
+for key in ["responses", "question_number", "show_results"]:
+    if key not in st.session_state:
+        if key == "responses":
+            st.session_state[key] = {}
+        elif key == "question_number":
+            st.session_state[key] = 0
+        elif key == "show_results":
+            st.session_state[key] = False
 
 # Définition des questions avec thèmes, emojis et options adaptées
 questions = [
@@ -212,7 +211,7 @@ def display_question(question_data, question_num):
     st.markdown(breadcrumb, unsafe_allow_html=True)
 
     # Affichage de la question
-    st.markdown(f"<div class='question-container'><b>{question_text}</b></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='container'><b>{question_text}</b></div>", unsafe_allow_html=True)
 
     # Gestion des réponses avec callback
     selected = st.radio("Sélectionnez une réponse :", choices, key=f"response_{question_num}")
@@ -284,7 +283,8 @@ def display_results():
             angularaxis=dict(showline=True, linecolor="lightgrey")
         ),
         showlegend=False,
-        template="plotly_dark"
+        template="plotly_dark",
+        margin=dict(l=50, r=50, t=50, b=50)
     )
 
     # Création du contenu HTML complet pour la page des résultats
@@ -306,19 +306,7 @@ def display_results():
         <p>👉 <a href="https://insidegroup.fr/actualites/acculturation-ia/" style="color: #81c784;">Découvrez nos formations</a></p>
         <hr>
         <div class='button-container'>
-            <button style="
-                background-color: #f44336; 
-                color: white; 
-                padding: 10px 20px; 
-                text-align: center; 
-                text-decoration: none; 
-                display: inline-block; 
-                font-size: 16px; 
-                border: none; 
-                border-radius: 5px;
-                cursor: pointer;" onclick="window.location.reload();">
-                🔄 Recommencer l'évaluation
-            </button>
+            <button onclick="window.location.href='?reset=true'">🔄 Recommencer l'évaluation</button>
         </div>
     </div>
     """
@@ -328,6 +316,17 @@ def display_results():
 
     # Afficher le graphique radar
     st.plotly_chart(fig, use_container_width=True)
+
+    # Gestion de la réinitialisation via URL
+    query_params = st.experimental_get_query_params()
+    if "reset" in query_params:
+        reset_evaluation()
+
+# Gestion de la réinitialisation via bouton
+if st.button("🔄 Recommencer l'évaluation"):
+    reset_evaluation()
+    # Pour éviter que le bouton reste enfoncé et que la page ne se recharge pas automatiquement
+    st.experimental_rerun()
 
 # Affichage des questions ou des résultats selon l'état
 if not st.session_state["show_results"]:
