@@ -107,12 +107,17 @@ st.markdown("""
 st.markdown("# 🚀 Évaluation Interactive des Compétences en IA et IA Assistée")
 
 # Initialisation de l'état de session
-if "responses" not in st.session_state:
-    st.session_state["responses"] = {}
-    st.session_state["question_number"] = 0
-    st.session_state["show_results"] = False
-    st.session_state["mode"] = None
-    st.session_state["profile"] = None
+keys_defaults = {
+    "responses": {},
+    "question_number": 0,
+    "show_results": False,
+    "mode": None,
+    "profile": None
+}
+
+for key, default in keys_defaults.items():
+    if key not in st.session_state:
+        st.session_state[key] = default
 
 # Définition des questions pour différentes sections
 questions = {
@@ -148,13 +153,23 @@ questions = {
     ]
 }
 
+# Mapping des réponses à un score numérique pour le graphique radar
+responses_scores = {
+    "🟢 Très à l'aise": 3, "🟡 Assez à l'aise": 2, "🔴 Peu à l'aise": 1,
+    "🟢 Expérimenté(e)": 3, "🟡 Connaissances de base": 2, "🔴 Aucune expérience": 1,
+    "🟢 Oui, bien": 3, "🟡 Moyennement": 2, "🔴 Non": 1,
+    "🟢 Oui, régulièrement": 3, "🟡 Parfois": 2, "🔴 Jamais": 1,
+    "🟢 Très prêt(e)": 3, "🟡 Assez prêt(e)": 2, "🔴 Pas vraiment": 1,
+    "🟢 Fréquemment": 3, "🟡 Parfois": 2, "🔴 Rarement": 1,
+    "🟢 Très bonne": 3, "🟡 Moyenne": 2, "🔴 Faible": 1,
+    "🟢 Beaucoup": 3, "🟡 Modérément": 2, "🔴 Peu": 1,
+    "🟢 Tâches répétitives": 3, "🟡 Analyse de données": 2, "🔴 Créativité et prise de décision": 1
+}
+
 def reset_evaluation():
     """Réinitialiser l'évaluation"""
-    st.session_state["responses"] = {}
-    st.session_state["question_number"] = 0
-    st.session_state["show_results"] = False
-    st.session_state["mode"] = None
-    st.session_state["profile"] = None
+    for key, default in keys_defaults.items():
+        st.session_state[key] = default
 
 def select_mode():
     """Sélectionner le mode : Projet IA ou Formation IA"""
@@ -177,16 +192,19 @@ def select_profile():
         st.session_state["question_number"] += 1
 
 def display_question(question, choices, question_num, total_questions):
-    """Afficher une question avec ses choix"""
+    """Afficher une question avec ses choix et le fil d'Ariane"""
     # Création du fil d'Ariane avec thèmes
     breadcrumb = '<ul class="breadcrumb">'
     for i in range(1, total_questions+1):
         if i < question_num:
-            breadcrumb += f'<li><span class="active">{questions[current_section][i-1]["theme"]}</span></li>'
+            theme = questions[current_section][i-1]["theme"]
+            breadcrumb += f'<li><span class="active">{theme}</span></li>'
         elif i == question_num:
-            breadcrumb += f'<li><span class="active">{questions[current_section][i-1]["theme"]}</span></li>'
+            theme = questions[current_section][i-1]["theme"]
+            breadcrumb += f'<li><span class="active">{theme}</span></li>'
         else:
-            breadcrumb += f'<li>{questions[current_section][i-1]["theme"]}</li>'
+            theme = questions[current_section][i-1]["theme"]
+            breadcrumb += f'<li>{theme}</li>'
     breadcrumb += '</ul>'
     st.markdown(breadcrumb, unsafe_allow_html=True)
     
@@ -204,7 +222,7 @@ def display_question(question, choices, question_num, total_questions):
 
 def display_questions():
     """Afficher les questions en fonction du mode et du profil"""
-    global current_section
+    # Déterminer la section actuelle en fonction du mode et du profil
     if st.session_state["mode"] == "Formation IA":
         if st.session_state["profile"] == "Technique":
             current_section = "Formation Technique"
@@ -212,6 +230,10 @@ def display_questions():
             current_section = "Formation Non Technique"
     elif st.session_state["mode"] == "Projet IA":
         current_section = "Projet IA"
+    else:
+        st.error("Mode non reconnu. Veuillez réinitialiser l'évaluation.")
+        reset_evaluation()
+        return
     
     current_question_num = st.session_state["question_number"]
     total_questions = len(questions[current_section])
@@ -226,6 +248,19 @@ def display_results():
     """Afficher les résultats après l'évaluation"""
     st.markdown("<div class='result-container'><h2>🌟 Félicitations ! 🌟</h2></div>", unsafe_allow_html=True)
     st.balloons()
+    
+    # Déterminer la section actuelle en fonction du mode et du profil
+    if st.session_state["mode"] == "Formation IA":
+        if st.session_state["profile"] == "Technique":
+            current_section = "Formation Technique"
+        else:
+            current_section = "Formation Non Technique"
+    elif st.session_state["mode"] == "Projet IA":
+        current_section = "Projet IA"
+    else:
+        st.error("Mode non reconnu. Veuillez réinitialiser l'évaluation.")
+        reset_evaluation()
+        return
     
     # Calcul des scores pour le graphique radar
     competence_scores = {}
@@ -256,7 +291,10 @@ def display_results():
             niveau_message = "Il semble que vous n'ayez pas encore les prérequis nécessaires pour lancer un projet IA. Découvrez nos formations pour vous préparer."
         else:
             niveau = "✅ Prérequis satisfaits"
-            niveau_message = "Vous avez les prérequis nécessaires pour lancer un projet IA. Contactez-nous pour vous accompagner dans votre démarche."
+            niveau_message = "Vous possédez les prérequis nécessaires pour démarrer un projet IA. Contactez-nous pour bénéficier de notre expertise et de nos services d'accompagnement."
+    else:
+        niveau = "Inconnu"
+        niveau_message = "Veuillez réinitialiser l'évaluation."
     
     # Afficher le pourcentage et le niveau
     st.markdown(f"### 🔢 Votre Niveau de Compétence en IA: **{pourcentage:.1f}%**")
