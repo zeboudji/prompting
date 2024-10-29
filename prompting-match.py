@@ -56,6 +56,7 @@ st.markdown("""
         justify-content: space-between;
         padding: 0;
         margin-bottom: 20px;
+        font-size: 0.8em; /* Réduction de la taille du texte */
     }
     .breadcrumb li {
         flex: 1;
@@ -143,63 +144,45 @@ for key in ["responses", "question_number", "show_results"]:
 # Définition des questions avec thèmes, emojis et options adaptées
 questions = [
     {
-        "theme": "Familiarité avec les Concepts",
-        "question": "🔍 **Les notions de prompt et de GPT vous parlent-elles ?**",
-        "choices": ["Sélectionnez une réponse", "🔰 Débutant(e)", "📘 Intermédiaire", "🌟 Avancé(e)"]
+        "theme": "Compréhension des Concepts",
+        "question": "🗣️ **Dans votre métier, vous arrive-t-il d'exprimer des besoins spécifiques à votre équipe ou à votre supérieur ?**",
+        "choices": ["Sélectionnez une réponse", "🔰 Rarement", "📘 Parfois", "🌟 Fréquemment"]
     },
     {
-        "theme": "Compréhension de RAG",
-        "question": "🤖 **Connaissez-vous les concepts de RAG (Retrieval-Augmented Generation) ?**",
-        "choices": ["Sélectionnez une réponse", "❓ Pas familier(e)", "🧠 Je connais les bases", "🚀 Je suis expérimenté(e)"]
+        "theme": "Identification des Besoins",
+        "question": "📋 **Est-ce que vous avez l'habitude de récolter les besoins de vos clients ou de vos collègues pour définir des projets ?**",
+        "choices": ["Sélectionnez une réponse", "🔰 Jamais", "📘 Occasionnellement", "🌟 Régulièrement"]
+    },
+    {
+        "theme": "Connaissance de l'Agilité",
+        "question": "⚡ **Le concept d'agilité en gestion de projet vous est-il familier ?**",
+        "choices": ["Sélectionnez une réponse", "🔰 Pas du tout", "📘 Un peu", "🌟 Oui, je l'applique régulièrement"]
     },
     {
         "theme": "Utilisation des Outils IA",
-        "question": "📈 **Utilisez-vous des outils d'IA dans vos tâches quotidiennes ?**",
-        "choices": ["Sélectionnez une réponse", "✅ Oui, régulièrement", "📉 Parfois", "❌ Jamais"]
-    },
-    {
-        "theme": "Machine Learning",
-        "question": "🧠 **Quel est votre niveau de compréhension du machine learning ?**",
-        "choices": ["Sélectionnez une réponse", "📚 Compréhension de base", "🔍 Compréhension intermédiaire", "🚀 Expertise avancée"]
-    },
-    {
-        "theme": "Intégration de Modèles IA",
-        "question": "🛠️ **Avez-vous déjà intégré des modèles d'IA dans vos projets professionnels ?**",
-        "choices": ["Sélectionnez une réponse", "✅ Oui, plusieurs fois", "🟡 Une ou deux fois", "🔴 Non, jamais"]
+        "question": "🤖 **Utilisez-vous des outils d'intelligence artificielle (IA) pour améliorer votre efficacité au travail ?**",
+        "choices": ["Sélectionnez une réponse", "🔰 Jamais", "📘 Parfois", "🌟 Fréquemment"]
     },
     {
         "theme": "Rédaction de Prompts",
-        "question": "📝 **Comment évalueriez-vous votre capacité à rédiger des prompts efficaces pour l'IA ?**",
-        "choices": ["Sélectionnez une réponse", "📝 Très efficace", "📄 Moyennement efficace", "⚠️ Peu efficace"]
+        "question": "📝 **Avez-vous déjà rédigé des prompts pour interagir avec des outils d'IA comme ChatGPT ?**",
+        "choices": ["Sélectionnez une réponse", "🔰 Jamais", "📘 Rarement", "🌟 Souvent"]
     },
     {
-        "theme": "Gestion de Projets Complexes",
-        "question": "🔄 **Dans quelle mesure savez-vous diviser un projet complexe en étapes plus petites pour faciliter l'interaction avec l'IA ?**",
-        "choices": ["Sélectionnez une réponse", "✔️ Oui, j’utilise cette approche régulièrement", "🔄 J’ai quelques idées, mais je pourrais m’améliorer", "❌ Non, je ne suis pas sûr(e) de comment faire"]
-    },
-    {
-        "theme": "Adaptabilité des Prompts",
-        "question": "🗣️ **Comment évalueriez-vous votre capacité à adapter le ton et le style des prompts en fonction du contexte de votre projet ?**",
-        "choices": ["Sélectionnez une réponse", "🗣️ Très adaptable", "😊 Souvent adaptable", "🛑 Peu adaptable"]
-    },
-    {
-        "theme": "Structuration des Réponses IA",
-        "question": "📊 **Comment évalueriez-vous votre capacité à structurer les réponses de l'IA pour obtenir des informations claires et organisées dans vos rapports ou présentations ?**",
-        "choices": ["Sélectionnez une réponse", "📊 Très structuré", "📈 Parfois structuré", "🚧 Peu structuré"]
+        "theme": "Structuration des Informations",
+        "question": "📈 **Comment évaluez-vous votre capacité à organiser les informations fournies par un outil d'IA dans vos rapports ou présentations ?**",
+        "choices": ["Sélectionnez une réponse", "🔰 Peu structuré", "📘 Moyennement structuré", "🌟 Très structuré"]
     }
 ]
 
 # Mapping des réponses à un score numérique pour le graphique radar
 responses_scores = {
-    "🔰 Débutant(e)": 1, "📘 Intermédiaire": 2, "🌟 Avancé(e)": 3,
-    "❓ Pas familier(e)": 1, "🧠 Je connais les bases": 2, "🚀 Je suis expérimenté(e)": 3,
-    "✅ Oui, régulièrement": 3, "📉 Parfois": 2, "❌ Jamais": 1,
-    "📚 Compréhension de base": 1, "🔍 Compréhension intermédiaire": 2, "🚀 Expertise avancée": 3,
-    "✅ Oui, plusieurs fois": 3, "🟡 Une ou deux fois": 2, "🔴 Non, jamais": 1,
-    "📝 Très efficace": 3, "📄 Moyennement efficace": 2, "⚠️ Peu efficace": 1,
-    "✔️ Oui, j’utilise cette approche régulièrement": 3, "🔄 J’ai quelques idées, mais je pourrais m’améliorer": 2, "❌ Non, je ne suis pas sûr(e) de comment faire": 1,
-    "🗣️ Très adaptable": 3, "😊 Souvent adaptable": 2, "🛑 Peu adaptable": 1,
-    "📊 Très structuré": 3, "📈 Parfois structuré": 2, "🚧 Peu structuré": 1
+    "🔰 Rarement": 1, "📘 Parfois": 2, "🌟 Fréquemment": 3,
+    "🔰 Jamais": 1, "📘 Occasionnellement": 2, "🌟 Régulièrement": 3,
+    "🔰 Pas du tout": 1, "📘 Un peu": 2, "🌟 Oui, je l'applique régulièrement": 3,
+    "🔰 Jamais": 1, "📘 Parfois": 2, "🌟 Fréquemment": 3,
+    "🔰 Jamais": 1, "📘 Rarement": 2, "🌟 Souvent": 3,
+    "🔰 Peu structuré": 1, "📘 Moyennement structuré": 2, "🌟 Très structuré": 3
 }
 
 def save_response(response, question_num):
@@ -248,7 +231,7 @@ def display_results():
     # Calcul des scores pour le graphique radar
     competence_scores = {}
     for idx, q in enumerate(questions, 1):
-        response = st.session_state["responses"].get(f"Question {idx}", "🔰 Débutant(e)")
+        response = st.session_state["responses"].get(f"Question {idx}", "🔰 Rarement")
         score = responses_scores.get(response, 1)
         theme = q["theme"]
         competence_scores[theme] = score
