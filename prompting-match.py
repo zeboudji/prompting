@@ -97,6 +97,29 @@ st.markdown("""
     .button-container button:hover {
         background-color: #d32f2f;
     }
+    /* Style pour le bouton de soumission du formulaire */
+    .submit-button {
+        background-color: #4CAF50; 
+        color: white; 
+        padding: 10px 20px; 
+        text-align: center; 
+        text-decoration: none; 
+        display: inline-block; 
+        font-size: 16px; 
+        border: none; 
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin-top: 20px;
+    }
+    .submit-button:hover {
+        background-color: #45a049;
+    }
+    /* Erreur de message */
+    .error-message {
+        color: #f44336;
+        margin-top: 10px;
+    }
     /* Responsive adjustments */
     @media (max-width: 600px) {
         .breadcrumb {
@@ -137,7 +160,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # Titre principal
-st.markdown("# 🚀L'IA, est ce pour moi ?")
+st.markdown("# 🚀 L'IA, est-ce pour moi ?")
 
 # Initialisation de l'état de session avec setdefault pour éviter KeyError
 for key in ["responses", "question_number", "show_results"]:
@@ -210,16 +233,20 @@ def display_question(question_data, question_num):
     breadcrumb += '</ul>'
     st.markdown(breadcrumb, unsafe_allow_html=True)
 
-    # Affichage de la question
-    st.markdown(f"<div class='container'><b>{question_text}</b></div>", unsafe_allow_html=True)
+    # Affichage de la question dans un conteneur stylisé
+    with st.container():
+        st.markdown(f"<div class='container'><b>{question_text}</b></div>", unsafe_allow_html=True)
 
-    # Gestion des réponses avec callback
-    selected = st.radio("Sélectionnez une réponse :", choices, key=f"response_{question_num}")
+        # Utilisation d'un formulaire pour gérer la soumission des réponses
+        with st.form(key=f'form_{question_num}'):
+            selected = st.radio("Sélectionnez une réponse :", choices, key=f"response_{question_num}")
+            submitted = st.form_submit_button("Suivant", type="primary", help="Cliquez pour passer à la question suivante", css_class="submit-button")
 
-    if selected != "Sélectionnez une réponse":
-        save_response(selected, question_num)
-    else:
-        st.markdown("<span class='error-message'>Veuillez sélectionner une réponse valide.</span>", unsafe_allow_html=True)
+            if submitted:
+                if selected != "Sélectionnez une réponse":
+                    save_response(selected, question_num)
+                else:
+                    st.markdown("<div class='error-message'>Veuillez sélectionner une réponse valide.</div>", unsafe_allow_html=True)
 
 # Fonction pour réinitialiser l'évaluation
 def reset_evaluation():
@@ -246,9 +273,13 @@ def display_results():
     categories = list(competence_scores.keys())
     values = list(competence_scores.values())
 
+    # Ajout d'une valeur égale à la première pour fermer le radar
+    values += values[:1]
+    categories += categories[:1]
+
     # Calcul du pourcentage de compatibilité
-    total_score = sum(values)
-    max_score = len(values) * 3
+    total_score = sum(values[:-1])  # Exclure la valeur ajoutée pour le radar
+    max_score = (len(values) - 1) * 3
     pourcentage = (total_score / max_score) * 100 if max_score > 0 else 0
 
     # Détermination du niveau basé sur le pourcentage
@@ -288,29 +319,19 @@ def display_results():
         margin=dict(l=50, r=50, t=50, b=50)
     )
 
-    # Création du contenu HTML complet pour la page des résultats
-   
-    
-    
     # Niveau d'acculturation
     st.markdown(f"### 🔢 Votre Niveau d'Acculturation à l'IA: **{pourcentage:.1f}%**", unsafe_allow_html=True)
     st.markdown(f"### **{niveau}**", unsafe_allow_html=True)
-    
-    # Ajout d'un espace
-    st.markdown("<br>", unsafe_allow_html=True)
-    
+
     # Afficher le graphique radar
     st.plotly_chart(fig, use_container_width=True)
-    
-    # Ajout d'un espace
-    st.markdown("<br>", unsafe_allow_html=True)
-    
+
     # Message de niveau
     st.markdown(f"<div class='motivation-message'><b>{niveau_message}</b></div>", unsafe_allow_html=True)
-    
+
     # Recommandation supplémentaire
     st.markdown(f"<div class='motivation-message'>{recommandation}</div>", unsafe_allow_html=True)
-    
+
     # Proposition de formation avec lien
     st.markdown("""
         ---
@@ -320,13 +341,11 @@ def display_results():
         
         👉 [Découvrez nos formations](https://insidegroup.fr/actualites/acculturation-ia/)
     """.format(pourcentage=pourcentage), unsafe_allow_html=True)
-    
+
     # Bouton pour recommencer l'évaluation
     st.markdown("<div class='button-container'>", unsafe_allow_html=True)
     if st.button("🔄 Recommencer l'évaluation"):
         reset_evaluation()
-    st.markdown("</div>", unsafe_allow_html=True)
-    
     st.markdown("</div>", unsafe_allow_html=True)
 
 # Affichage des questions ou des résultats selon l'état
