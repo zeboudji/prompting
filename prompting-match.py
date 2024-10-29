@@ -104,7 +104,7 @@ questions = [
     },
     {
         "theme": "Structuration des Informations",
-        "question": "📊 **Comment évaluez-vous votre capacité à organiser les informations fournies par un outil d'IA dans vos rapports ou présentations ?",
+        "question": "📊 Comment évaluez-vous votre capacité à organiser les informations fournies par un outil d'IA dans vos rapports ou présentations ?",
         "choices": ["Sélectionner une réponse","🔰 Peu structuré", "📚 Moyennement structuré", "🌟 Très structuré"]
     }
 ]
