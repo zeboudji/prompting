@@ -190,14 +190,14 @@ elif st.session_state["step"] == "questions":
         st.metric("🔢 Votre Niveau de Connaissance en IA", f"{pourcentage:.1f}%")
         
         # Proposition de formation
-        st.markdown("""
+        st.markdown(f"""
             ---
             🎓 **Prolongez votre apprentissage !**
             
             Vous avez obtenu un score de **{pourcentage:.1f}%** dans votre évaluation. Pour perfectionner vos connaissances et pratiques en IA et en prompting, découvrez nos **formations personnalisées** adaptées à votre niveau.
             
-            👉 [Découvrez nos formations](#)
-        """.format(pourcentage=pourcentage))
+            👉 [Découvrez nos formations](https://votre-site.com/formations)
+        """)
         
         # Bouton pour recommencer l'évaluation
         if st.button("🔄 Recommencer l'évaluation"):
