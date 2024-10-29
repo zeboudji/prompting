@@ -104,12 +104,12 @@ questions = [
 
 def save_response(response, question_num):
     """Sauvegarder la réponse et passer à la question suivante"""
-    st.session_state["responses"][f"Question {question_num}"] = response
-    st.session_state["question_number"] += 1
-    # Vérification directe pour afficher les résultats si dernière question
-    if st.session_state["question_number"] >= len(questions):
-        st.session_state["show_results"] = True
-    st.experimental_rerun()
+    if response:  # Vérifier si une réponse est sélectionnée
+        st.session_state["responses"][f"Question {question_num}"] = response
+        st.session_state["question_number"] += 1
+        # Vérification directe pour afficher les résultats si dernière question
+        if st.session_state["question_number"] >= len(questions):
+            st.session_state["show_results"] = True
 
 # Fonction pour afficher une question sous forme d'accordéon
 def display_question_accordion():
@@ -199,7 +199,6 @@ def display_results():
     st.plotly_chart(fig, use_container_width=True)
 
     # Message de niveau
-    st.markdown(f"<div class='motivation-message'><b>{niveau_message}</b></div>", unsafe_allow_html=True)
     st.markdown(f"<div class='motivation-message'><b>{niveau_message}</b></div>", unsafe_allow_html=True)
     st.markdown(f"<div class='motivation-message'>{recommandation}</div>", unsafe_allow_html=True)
 
