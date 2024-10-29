@@ -64,7 +64,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # Affichage du sous-titre
-st.title("L'IA, est-ce pour moi ?")
+
 st.subheader("Calculez votre score de compatibilité avec l'IA et découvrez si vous êtes déjà prêt, sans même le savoir ! 🚀")
 
 # Initialisation de l'état de session avec setdefault pour éviter KeyError
