@@ -240,7 +240,7 @@ def display_question(question_data, question_num):
         # Utilisation d'un formulaire pour gérer la soumission des réponses
         with st.form(key=f'form_{question_num}'):
             selected = st.radio("Sélectionnez une réponse :", choices, key=f"response_{question_num}")
-            submitted = st.form_submit_button("Suivant", type="primary", help="Cliquez pour passer à la question suivante", css_class="submit-button")
+            submitted = st.form_submit_button("Suivant", help="Cliquez pour passer à la question suivante")
 
             if submitted:
                 if selected != "Sélectionnez une réponse":
