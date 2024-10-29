@@ -45,8 +45,27 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Titre principal
-st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
+# Titre principal et bouton en haut
+col1, col2 = st.columns([3, 1])
+with col1:
+    st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
+with col2:
+    st.markdown("""
+        <a href="https://insidegroup.fr/actualites/acculturation-ia/" target="_blank">
+            <button style="
+                background-color: #4CAF50; 
+                color: white; 
+                padding: 10px 20px; 
+                text-align: center; 
+                text-decoration: none; 
+                display: inline-block; 
+                font-size: 16px; 
+                border: none; 
+                border-radius: 5px;">
+                📚 Découvrez nos formations
+            </button>
+        </a>
+        """, unsafe_allow_html=True)
 
 # Initialisation de l'état de session
 if "responses" not in st.session_state:
@@ -191,7 +210,6 @@ def reset_evaluation():
     st.session_state["responses"] = {}
     st.session_state["question_number"] = 0
     st.session_state["show_results"] = False
-    st.experimental_rerun()
 
 # Affichage des questions ou des résultats selon l'état
 if not st.session_state["show_results"]:
