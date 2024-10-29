@@ -5,22 +5,20 @@ import plotly.graph_objects as go
 st.markdown("# 🚀 Évaluation Interactive des Compétences en Prompting IA")
 
 # Initialisation de l'état de session
-if "step" not in st.session_state:
-    st.session_state["step"] = "questions"
+if "responses" not in st.session_state:
     st.session_state["responses"] = {}
-    st.session_state["question_number"] = 1
+    st.session_state["question_number"] = 0
+    st.session_state["show_results"] = False
 
 def next_question():
     """Fonction pour passer à la question suivante"""
     st.session_state["question_number"] += 1
-    if st.session_state["question_number"] > len(questions):
-        st.session_state["step"] = "results"
 
 def reset_evaluation():
     """Fonction pour recommencer l'évaluation"""
-    st.session_state["step"] = "questions"
     st.session_state["responses"] = {}
-    st.session_state["question_number"] = 1
+    st.session_state["question_number"] = 0
+    st.session_state["show_results"] = False
 
 # Définition des questions avec emojis et options
 questions = [
@@ -48,21 +46,28 @@ responses_scores = {
     "🚧 Peu structuré": 1, "📈 Parfois structuré": 2, "📊 Très structuré": 3
 }
 
-# Fonction pour afficher une question
-def display_question(question_text, choices, question_num):
-    st.markdown(f"<div style='padding: 20px; background-color: #e3f2fd; border-radius: 10px; color: #0d47a1;'><b>{question_text}</b></div>", unsafe_allow_html=True)
-    with st.form(key=f"form_{question_num}"):
-        response = st.selectbox("Sélectionnez une réponse :", choices, key=f"response_{question_num}")
-        submitted = st.form_submit_button("Suivant")
-        if submitted:
-            if response != "Sélectionnez une réponse":
-                st.session_state["responses"][f"Question {question_num}"] = response
+# Affichage des questions
+if st.session_state["show_results"] == False:
+    if st.session_state["question_number"] < len(questions):
+        current_q = questions[st.session_state["question_number"]]
+        question_text, choices = current_q
+        st.markdown(f"<div style='padding: 20px; background-color: #e3f2fd; border-radius: 10px; color: #0d47a1;'><b>{question_text}</b></div>", unsafe_allow_html=True)
+        
+        selected = st.selectbox("Sélectionnez une réponse :", choices)
+        
+        if st.button("Suivant"):
+            if selected != "Sélectionnez une réponse":
+                st.session_state["responses"][f"Question {st.session_state['question_number'] +1}"] = selected
                 next_question()
             else:
                 st.error("Veuillez sélectionner une réponse valide.")
+    else:
+        # Toutes les questions ont été répondues, afficher le bouton pour voir les résultats
+        if st.button("Voir les Résultats"):
+            st.session_state["show_results"] = True
 
-# Fonction pour afficher les résultats
-def display_results():
+# Affichage des résultats
+if st.session_state["show_results"]:
     # Calcul des scores pour le graphique radar
     competence_scores = {
         "Familiarité": responses_scores.get(st.session_state["responses"].get("Question 1", "🔰 Débutant(e)"), 1),
@@ -118,16 +123,3 @@ def display_results():
     # Bouton pour recommencer l'évaluation
     if st.button("🔄 Recommencer l'évaluation"):
         reset_evaluation()
-
-# Affichage des questions ou des résultats selon l'état
-if st.session_state["step"] == "questions":
-    current_question_num = st.session_state["question_number"]
-    if current_question_num <= len(questions):
-        question_text, choices = questions[current_question_num - 1]
-        display_question(question_text, choices, current_question_num)
-    else:
-        st.session_state["step"] = "results"
-        st.experimental_rerun()
-
-elif st.session_state["step"] == "results":
-    display_results()
